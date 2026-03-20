@@ -196,8 +196,15 @@ function App() {
 
   const setActual = (rep,a,mon,val) => {
     setData(p => {
-      const nd = {...p,[rep]:{...p[rep],[a]:{...p[rep][a],[mon]:{...p[rep][a][mon],A:Number(val)||0}}}}};
-      save({data:nd}); return nd;
+      const repData = Object.assign({}, p[rep]);
+      const adjData = Object.assign({}, repData[a]);
+      const monData = Object.assign({}, adjData[mon], {A: Number(val)||0});
+      adjData[mon] = monData;
+      repData[a] = adjData;
+      const nd = Object.assign({}, p);
+      nd[rep] = repData;
+      save({data:nd});
+      return nd;
     });
   };
 
