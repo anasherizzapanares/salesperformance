@@ -7,18 +7,40 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCmj6CKzw_C6uIxlLj9DwDjKVwe88DEyFw",
+    authDomain: "sales-performance-1d7d1.firebaseapp.com",
+    projectId: "sales-performance-1d7d1",
+    storageBucket: "sales-performance-1d7d1.firebasestorage.app",
+    messagingSenderId: "985499387301",
+    appId: "1:985499387301:web:c75f3f7a9890dcc692544c"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  window.__db = db;
+  window.__firestoreReady = true;
+  window.__setDoc = setDoc;
+  window.__doc = doc;
+  window.__getDoc = getDoc;
+  window.__onSnapshot = onSnapshot;
+  window.dispatchEvent(new Event("firebaseReady"));
+</script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: Inter, sans-serif; font-size: 13px; background: #f8fafc; }
   button:focus { outline: none; }
   input:focus { outline: none; }
-  select { color: inherit; }
 </style>
 </head>
 <body>
 <div id="root"></div>
 <script type="text/babel">
-const { useState, useMemo } = React;
+const { useState, useMemo, useEffect, useCallback } = React;
 
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 const ADJ = ["MRR","E/F","One-time Fees","Implementation"];
@@ -113,9 +135,9 @@ const buildAccel = () => {
 const Badge = ({s}) => {
   if(!s||!STATUS_CFG[s])return null;
   const c=STATUS_CFG[s];
-  return React.createElement('span',{style:{fontSize:10,padding:"1px 6px",borderRadius:10,background:c.bg,color:c.color,fontWeight:600,whiteSpace:"nowrap"}},c.label);
+  return <span style={{fontSize:10,padding:"1px 6px",borderRadius:10,background:c.bg,color:c.color,fontWeight:600,whiteSpace:"nowrap"}}>{c.label}</span>;
 };
-const Chip = ({p}) => React.createElement('span',{style:{display:"inline-block",padding:"2px 8px",borderRadius:20,fontWeight:700,fontSize:12,background:aBg(p),color:aC(p)}},p.toFixed(1)+"%");
+const Chip = ({p}) => <span style={{display:"inline-block",padding:"2px 8px",borderRadius:20,fontWeight:700,fontSize:12,background:aBg(p),color:aC(p)}}>{p.toFixed(1)}%</span>;
 
 function App() {
   const [tab, setTab]             = useState(0);
@@ -132,51 +154,126 @@ function App() {
   const [sortDir, setSortDir]     = useState("desc");
   const [showAdd, setShowAdd]     = useState(false);
   const [newRep, setNewRep]       = useState({name:"",team:"ENT Builders",status:""});
+  const [dbReady, setDbReady]     = useState(false);
+  const [saving, setSaving]       = useState(false);
+  const [lastSaved, setLastSaved] = useState(null);
+
+  // Wait for Firebase to be ready
+  useEffect(() => {
+    if (window.__firestoreReady) { setDbReady(true); return; }
+    window.addEventListener("firebaseReady", () => setDbReady(true), {once:true});
+  }, []);
+
+  // Load data from Firestore on mount
+  useEffect(() => {
+    if (!dbReady) return;
+    const db = window.__db;
+    const unsub = window.__onSnapshot(window.__doc(db, "tracker", "state"), (snap) => {
+      if (snap.exists()) {
+        const d = snap.data();
+        if (d.data)  setData(d.data);
+        if (d.meta)  setMeta(d.meta);
+        if (d.accel) setAccel(d.accel);
+        if (d.reps)  setReps(d.reps);
+        if (d.curMon) setCurMon(d.curMon);
+      }
+    });
+    return () => unsub();
+  }, [dbReady]);
+
+  // Save to Firestore
+  const save = useCallback(async (newState) => {
+    if (!dbReady) return;
+    setSaving(true);
+    try {
+      await window.__setDoc(window.__doc(window.__db, "tracker", "state"), newState, {merge:true});
+      setLastSaved(new Date().toLocaleTimeString());
+    } catch(e) { console.error("Save error", e); }
+    setSaving(false);
+  }, [dbReady]);
 
   const mi = MONTHS.indexOf(curMon);
-  const setActual = (rep,a,mon,val) => setData(p=>({...p,[rep]:{...p[rep],[a]:{...p[rep][a],[mon]:{...p[rep][a][mon],A:Number(val)||0}}}}));
-  const setMetaF = (rep,field,val) => setMeta(p=>({...p,[rep]:{...p[rep],[field]:val}}));
-  const toggleAccel = (rep,mon) => setAccel(p=>{const cur=p[rep]?.[mon];const next=cur===null?true:cur===true?false:null;return {...p,[rep]:{...p[rep],[mon]:next}};});
+
+  const setActual = (rep,a,mon,val) => {
+    setData(p => {
+      const nd = {...p,[rep]:{...p[rep],[a]:{...p[rep][a],[mon]:{...p[rep][a][mon],A:Number(val)||0}}}}};
+      save({data:nd}); return nd;
+    });
+  };
+
+  const setMetaF = (rep,field,val) => {
+    setMeta(p => {
+      const nm = {...p,[rep]:{...p[rep],[field]:val}};
+      save({meta:nm}); return nm;
+    });
+  };
+
+  const toggleAccel = (rep,mon) => {
+    setAccel(p => {
+      const cur=p[rep]?.[mon], next=cur===null?true:cur===true?false:null;
+      const na = {...p,[rep]:{...p[rep],[mon]:next}};
+      save({accel:na}); return na;
+    });
+  };
+
+  const changeMonth = (m) => { setCurMon(m); save({curMon:m}); };
+
   const ytdA = n => MONTHS.slice(0,mi+1).reduce((s,m)=>s+(data[n]?.MRR[m]?.A||0),0);
   const ytdT = n => MONTHS.slice(0,mi+1).reduce((s,m)=>s+(data[n]?.MRR[m]?.T||0),0);
   const monA = n => data[n]?.MRR[curMon]?.A||0;
+
   const summary = n => {
     const r={};
     ADJ.forEach(a=>{let T=0,A=0;MONTHS.forEach(m=>{T+=data[n]?.[a]?.[m]?.T||0;A+=data[n]?.[a]?.[m]?.A||0;});r[a]={T,A,p:pct(A,T)};});
     const T=ADJ.reduce((s,a)=>s+r[a].T,0),A=ADJ.reduce((s,a)=>s+r[a].A,0);
-    r.all={T,A,p:pct(A,T)};return r;
+    r.all={T,A,p:pct(A,T)}; return r;
   };
+
   const activeReps = reps.filter(r=>!r.s);
   const shownReps  = showInactive?reps:activeReps;
-  const togSort = col => {if(sortCol===col)setSortDir(d=>d==="desc"?"asc":"desc");else{setSortCol(col);setSortDir("desc");}};
+  const togSort = col => { if(sortCol===col)setSortDir(d=>d==="desc"?"asc":"desc"); else{setSortCol(col);setSortDir("desc");} };
   const sortedReps = useMemo(()=>[...shownReps].sort((a,b)=>{if(!sortCol)return 0;const va=sortCol==="att"?pct(ytdA(a.n),ytdT(a.n)):ytdA(a.n);const vb=sortCol==="att"?pct(ytdA(b.n),ytdT(b.n)):ytdA(b.n);return sortDir==="desc"?vb-va:va-vb;}),[shownReps,sortCol,sortDir,data,curMon]);
   const lbReps = useMemo(()=>[...shownReps].map(r=>({...r,...summary(r.n),ytdP:pct(ytdA(r.n),ytdT(r.n))})).sort((a,b)=>b.ytdP-a.ytdP),[shownReps,data,curMon]);
+
   const totYtdT=activeReps.reduce((s,r)=>s+ytdT(r.n),0),totYtdA=activeReps.reduce((s,r)=>s+ytdA(r.n),0),totFc=activeReps.reduce((s,r)=>s+(meta[r.n]?.fc||0),0),totMonA=activeReps.reduce((s,r)=>s+monA(r.n),0),totNL=activeReps.reduce((s,r)=>s+(meta[r.n]?.nl||0),0);
+
   const addRep = () => {
     if(!newRep.name.trim())return;
     const r={n:newRep.name.trim(),t:newRep.team,...(newRep.status?{s:newRep.status}:{})};
-    setReps(p=>[...p,r]);
-    setData(p=>{const d={...p};d[r.n]=emptyRepData();return d;});
-    setMeta(p=>({...p,[r.n]:{fc:0,ef:false,mq:false,nl:0}}));
+    const nr=[...reps,r];
+    setReps(nr);
+    setData(p=>{const d={...p};d[r.n]=emptyRepData();save({data:d,reps:nr});return d;});
+    setMeta(p=>{const m={...p,[r.n]:{fc:0,ef:false,mq:false,nl:0}};return m;});
     setAccel(p=>{const d={...p};d[r.n]={};MONTHS.forEach(m=>{d[r.n][m]=null;});return d;});
     setNewRep({name:"",team:"ENT Builders",status:""});setShowAdd(false);
   };
+
   const thS=(ex={})=>({padding:"8px 8px",color:"#fff",background:"#1e3a8a",...ex});
 
   return (
     <div style={{fontFamily:"Inter,sans-serif",fontSize:13,background:"#f8fafc",minHeight:"100vh"}}>
       <div style={{background:"linear-gradient(135deg,#1e3a8a,#2563eb)",color:"#fff",padding:"14px 20px",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:8}}>
-        <div><div style={{fontWeight:700,fontSize:17}}>FY26 Sales Performance Tracker</div><div style={{opacity:.8,fontSize:11,marginTop:2}}>6 Teams · {activeReps.length} Active Reps · ₱ PHP</div></div>
-        <div style={{display:"flex",alignItems:"center",gap:8}}>
-          <span style={{fontSize:12,opacity:.8}}>Month:</span>
-          <select value={curMon} onChange={e=>setCurMon(e.target.value)} style={{padding:"4px 8px",borderRadius:6,border:"none",fontSize:13,fontWeight:600,color:"#1e3a8a",background:"#fff"}}>
-            {MONTHS.map(m=><option key={m}>{m}</option>)}
-          </select>
+        <div>
+          <div style={{fontWeight:700,fontSize:17}}>FY26 Sales Performance Tracker</div>
+          <div style={{opacity:.8,fontSize:11,marginTop:2}}>6 Teams · {activeReps.length} Active Reps · ₱ PHP</div>
+        </div>
+        <div style={{display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}>
+          <div style={{fontSize:11,opacity:.8}}>
+            {!dbReady?"⏳ Connecting...":saving?"💾 Saving...":lastSaved?`✅ Saved ${lastSaved}`:"✅ Connected"}
+          </div>
+          <div style={{display:"flex",alignItems:"center",gap:8}}>
+            <span style={{fontSize:12,opacity:.8}}>Month:</span>
+            <select value={curMon} onChange={e=>changeMonth(e.target.value)} style={{padding:"4px 8px",borderRadius:6,border:"none",fontSize:13,fontWeight:600,color:"#1e3a8a",background:"#fff"}}>
+              {MONTHS.map(m=><option key={m}>{m}</option>)}
+            </select>
+          </div>
         </div>
       </div>
+
       <div style={{display:"flex",background:"#fff",borderBottom:"1px solid #e2e8f0",paddingLeft:12,overflowX:"auto"}}>
         {TABS.map((t,i)=><button key={i} onClick={()=>setTab(i)} style={{padding:"10px 14px",border:"none",background:"none",cursor:"pointer",whiteSpace:"nowrap",fontWeight:tab===i?700:400,color:tab===i?"#2563eb":"#64748b",borderBottom:tab===i?"2px solid #2563eb":"2px solid transparent",fontSize:13}}>{t}</button>)}
       </div>
+
       <div style={{padding:14}}>
 
         {tab===0&&<div>
