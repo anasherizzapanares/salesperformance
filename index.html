@@ -26,7 +26,21 @@
   window.__firestoreReady = true;
   window.dispatchEvent(new Event("firebaseReady"));
 </script>
-<style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:Inter,sans-serif;font-size:13px;background:#f8fafc;}button:focus,input:focus{outline:none;}</style>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Rubik',sans-serif;font-size:13px;background:#F7F9ED;}
+  button:focus,input:focus{outline:none;}
+  :root{
+    --green:#32CE13;--deep-green:#092903;--green-50:#E9FAE5;--green-100:#C9F3BE;--green-800:#239A0D;
+    --ubas:#8139EE;--ubas-50:#F5F3FF;--ubas-100:#EEE9FE;
+    --lime:#D2F612;--lime-50:#FBFEEB;
+    --carrot:#FF7F00;--carrot-50:#FFFAEC;
+    --blue:#1679FA;--blue-50:#EEF7FF;
+    --bg1:#F7F5F2;--bg2:#F7F9ED;--bg4:#E1F6C8;
+    --text:#092903;--text-muted:#5a6a5a;
+  }
+</style>
 </head>
 <body>
 <div id="root"></div>
@@ -78,8 +92,8 @@ const INIT_REPS = [
 const fmt  = n => n===0?"₱0":"₱"+Number(n).toLocaleString();
 const fmtK = n => n===0?"₱0":"₱"+(n/1000).toFixed(0)+"K";
 const pct  = (a,t) => t===0?0:Math.round(a/t*10000)/100;
-const aC   = p => p>=100?"#16a34a":p>=80?"#2563eb":p>=60?"#ea580c":"#dc2626";
-const aBg  = p => p>=100?"#dcfce7":p>=80?"#dbeafe":p>=60?"#ffedd5":"#fee2e2";
+const aC   = p => p>=100?"#32CE13":p>=80?"#1679FA":p>=60?"#FF7F00":"#dc2626";
+const aBg  = p => p>=100?"#E9FAE5":p>=80?"#EEF7FF":p>=60?"#FFFAEC":"#fee2e2";
 
 function emptyRep() {
   var d={};
@@ -313,28 +327,31 @@ function App() {
     setNewRep({name:"",team:"ENT Builders",status:""});setShowAdd(false);
   }
 
-  var ths = function(ex){return Object.assign({padding:"8px 8px",color:"#fff",background:"#1e3a8a"},ex||{});};
+  var ths = function(ex){return Object.assign({padding:"8px 8px",color:"#fff",background:"#092903"},ex||{});};
 
   return (
-    <div style={{fontFamily:"Inter,sans-serif",fontSize:13,background:"#f8fafc",minHeight:"100vh"}}>
-      <div style={{background:"linear-gradient(135deg,#1e3a8a,#2563eb)",color:"#fff",padding:"14px 20px",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:8}}>
-        <div>
-          <div style={{fontWeight:700,fontSize:17}}>FY26 Sales Performance Tracker</div>
-          <div style={{opacity:.8,fontSize:11,marginTop:2}}>6 Teams · {activeReps.length} Active Reps · ₱ PHP</div>
+    <div style={{fontFamily:"'Rubik',sans-serif",fontSize:13,background:"#F7F9ED",minHeight:"100vh"}}>
+      <div style={{background:"#092903",color:"#fff",padding:"14px 20px",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:8}}>
+        <div style={{display:"flex",alignItems:"center",gap:12}}>
+          <div style={{width:32,height:32,background:"#32CE13",borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700,fontSize:16,color:"#092903"}}>S</div>
+          <div>
+            <div style={{fontWeight:700,fontSize:17,letterSpacing:-.3}}>FY26 Sales Performance</div>
+            <div style={{opacity:.7,fontSize:11,marginTop:1}}>Sprout Solutions · 6 Teams · {activeReps.length} Active Reps · ₱ PHP</div>
+          </div>
         </div>
         <div style={{display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}>
-          <div style={{fontSize:11,opacity:.8}}>{!dbReady?"⏳ Connecting...":saving?"💾 Saving...":lastSaved?"✅ Saved "+lastSaved:"✅ Connected"}</div>
+          <div style={{fontSize:11,background:"rgba(50,206,19,0.15)",color:"#32CE13",padding:"3px 10px",borderRadius:20,fontWeight:600}}>{!dbReady?"⏳ Connecting...":saving?"💾 Saving...":lastSaved?"✅ Saved "+lastSaved:"✅ Live"}</div>
           <div style={{display:"flex",alignItems:"center",gap:8}}>
-            <span style={{fontSize:12,opacity:.8}}>Month:</span>
-            <select value={curMon} onChange={function(e){changeMonth(e.target.value);}} style={{padding:"4px 8px",borderRadius:6,border:"none",fontSize:13,fontWeight:600,color:"#1e3a8a",background:"#fff"}}>
+            <span style={{fontSize:12,opacity:.7}}>Month:</span>
+            <select value={curMon} onChange={function(e){changeMonth(e.target.value);}} style={{padding:"4px 8px",borderRadius:6,border:"none",fontSize:13,fontWeight:600,color:"#092903",background:"#32CE13"}}>
               {MONTHS.map(function(m){return <option key={m}>{m}</option>;})}
             </select>
           </div>
         </div>
       </div>
 
-      <div style={{display:"flex",background:"#fff",borderBottom:"1px solid #e2e8f0",paddingLeft:12,overflowX:"auto"}}>
-        {TABS.map(function(t,i){return <button key={i} onClick={function(){setTab(i);}} style={{padding:"10px 14px",border:"none",background:"none",cursor:"pointer",whiteSpace:"nowrap",fontWeight:tab===i?700:400,color:tab===i?"#2563eb":"#64748b",borderBottom:tab===i?"2px solid #2563eb":"2px solid transparent",fontSize:13}}>{t}</button>;})}
+      <div style={{display:"flex",background:"#fff",borderBottom:"2px solid #E9FAE5",paddingLeft:12,overflowX:"auto"}}>
+        {TABS.map(function(t,i){return <button key={i} onClick={function(){setTab(i);}} style={{padding:"10px 14px",border:"none",background:"none",cursor:"pointer",whiteSpace:"nowrap",fontWeight:tab===i?700:400,color:tab===i?"#32CE13":"#5a6a5a",borderBottom:tab===i?"2px solid #32CE13":"2px solid transparent",fontSize:13}}>{t}</button>;})}
       </div>
 
       <div style={{padding:14}}>
