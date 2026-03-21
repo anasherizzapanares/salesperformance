@@ -617,16 +617,16 @@ function App() {
                     <div style={{textAlign:"center"}}><div style={{fontSize:10,color:"#94a3b8",marginBottom:1}}>ACTUAL</div><div style={{fontWeight:700,fontSize:12,color:"#2563eb"}}>{fmtK(A)}</div></div>
                     <div style={{textAlign:"center"}}><div style={{fontSize:10,color:"#94a3b8",marginBottom:1}}>ATTAINMENT</div><div style={{fontWeight:700,fontSize:15,color:aC(tp)}}>{tp.toFixed(1)+"%"}</div></div>
                   </div>
-                  {sums.map(function(r){return <div key={r.n} style={{marginBottom:7,opacity:r.s?0.45:1}}>
+                  {allSorted.map(function(r){return <div key={r.n} style={{marginBottom:7,opacity:r.s?0.45:1}}>
                     <div style={{display:"flex",justifyContent:"space-between",fontSize:12,marginBottom:2}}>
                       <span style={{fontWeight:500,display:"flex",alignItems:"center",gap:3}}>{r.n.split(" ")[0]}<Badge s={r.s}/></span>
                       <span style={{fontWeight:700,color:r.s?"#94a3b8":aC(r.all.p)}}>{r.all.p.toFixed(1)+"%"}</span>
                     </div>
                     <div style={{background:"#e2e8f0",borderRadius:3,height:6}}><div style={{width:Math.min(r.all.p,100)+"%",background:r.s?"#cbd5e1":aC(r.all.p),borderRadius:3,height:6}}/></div>
                   </div>;})}
-                  {sorted2.length>1&&<div style={{marginTop:8,display:"flex",gap:6,fontSize:11}}>
-                    <span style={{background:"#dcfce7",color:"#16a34a",padding:"2px 7px",borderRadius:20}}>🔝 {sorted2[0].n.split(" ")[0]}</span>
-                    <span style={{background:"#fee2e2",color:"#dc2626",padding:"2px 7px",borderRadius:20}}>📉 {sorted2[sorted2.length-1].n.split(" ")[0]}</span>
+                  {act.length>1&&<div style={{marginTop:8,display:"flex",gap:6,fontSize:11}}>
+                    <span style={{background:"#E9FAE5",color:"#239A0D",padding:"2px 7px",borderRadius:20}}>🔝 {act[0].n.split(" ")[0]}</span>
+                    <span style={{background:"#fee2e2",color:"#dc2626",padding:"2px 7px",borderRadius:20}}>📉 {act[act.length-1].n.split(" ")[0]}</span>
                   </div>}
                 </div>
               </div>;
