@@ -9,62 +9,53 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-  const firebaseConfig = {
+  import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  const app = initializeApp({
     apiKey: "AIzaSyCmj6CKzw_C6uIxlLj9DwDjKVwe88DEyFw",
     authDomain: "sales-performance-1d7d1.firebaseapp.com",
     projectId: "sales-performance-1d7d1",
     storageBucket: "sales-performance-1d7d1.firebasestorage.app",
     messagingSenderId: "985499387301",
     appId: "1:985499387301:web:c75f3f7a9890dcc692544c"
-  };
-
-  const app = initializeApp(firebaseConfig);
+  });
   const db = getFirestore(app);
   window.__db = db;
-  window.__firestoreReady = true;
   window.__setDoc = setDoc;
   window.__doc = doc;
-  window.__getDoc = getDoc;
   window.__onSnapshot = onSnapshot;
+  window.__firestoreReady = true;
   window.dispatchEvent(new Event("firebaseReady"));
 </script>
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: Inter, sans-serif; font-size: 13px; background: #f8fafc; }
-  button:focus { outline: none; }
-  input:focus { outline: none; }
-</style>
+<style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:Inter,sans-serif;font-size:13px;background:#f8fafc;}button:focus,input:focus{outline:none;}</style>
 </head>
 <body>
 <div id="root"></div>
 <script type="text/babel">
-const { useState, useMemo, useEffect, useCallback } = React;
+const {useState,useMemo,useEffect,useCallback} = React;
 
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 const ADJ = ["MRR","E/F","One-time Fees","Implementation"];
 const TEAMS = ["ENT Builders","ENT Hunters","SME Jetzsetters","SME Strikers","Channels","Upsell"];
-const TEAM_COLOR = {"ENT Builders":"#1e3a8a","ENT Hunters":"#7c3aed","SME Jetzsetters":"#2563eb","SME Strikers":"#b45309","Channels":"#065f46","Upsell":"#9f1239"};
-const STATUS_CFG = {resigned:{label:"Resigned",bg:"#fee2e2",color:"#dc2626"},maternity:{label:"Maternity Leave",bg:"#fef9c3",color:"#ca8a04"},tbh:{label:"TBH",bg:"#e0f2fe",color:"#0369a1"}};
-const SEG_MAP = {"ENT Builders":"ENT","ENT Hunters":"ENT","SME Jetzsetters":"SME J","SME Strikers":"SME O","Channels":"Channels","Upsell":"Upsell SME"};
-const TABS = ["📊 Segment Summary","📋 Rep Summary","📥 Data Entry","🏆 Leaderboard","👥 Teams","⚡ Accelerator"];
+const TCOL = {"ENT Builders":"#1e3a8a","ENT Hunters":"#7c3aed","SME Jetzsetters":"#2563eb","SME Strikers":"#b45309","Channels":"#065f46","Upsell":"#9f1239"};
+const STCFG = {resigned:{label:"Resigned",bg:"#fee2e2",color:"#dc2626"},maternity:{label:"Maternity Leave",bg:"#fef9c3",color:"#ca8a04"},tbh:{label:"TBH",bg:"#e0f2fe",color:"#0369a1"}};
+const SEGMAP = {"ENT Builders":"ENT","ENT Hunters":"ENT","SME Jetzsetters":"SME J","SME Strikers":"SME O","Channels":"Channels","Upsell":"Upsell SME"};
+const TABS = ["📊 Segment","📋 Rep Summary","📥 Data Entry","🏆 Leaderboard","👥 Teams","⚡ Accelerator"];
 
-const SEGMENTS = ["ENT","SME","US"];
-const SEG_LABELS = {"ENT":"ENT","SME":"SME","US":"U/S"};
-const SEG_TARGETS = {
+const SEGS = ["ENT","SME","US"];
+const SEGLABEL = {ENT:"ENT",SME:"SME",US:"U/S"};
+const SEGTGT = {
   ENT: {
-    MRR: [540000,540000,540000,900000,900000,900000,900000,900000,900000,720000,720000,540000],
-    EmFin: [40000,40000,40000,40000,40000,40000,40000,40000,40000,40000,40000,40000],
+    MRR:[540000,540000,540000,900000,900000,900000,900000,900000,900000,720000,720000,540000],
+    EmFin:[40000,40000,40000,40000,40000,40000,40000,40000,40000,40000,40000,40000]
   },
   SME: {
-    MRR: [540000,540000,540000,900000,900000,900000,900000,900000,900000,720000,720000,540000],
-    EmFin: [50000,50000,50000,50000,50000,50000,50000,50000,50000,50000,50000,50000],
+    MRR:[540000,540000,540000,900000,900000,900000,900000,900000,900000,720000,720000,540000],
+    EmFin:[50000,50000,50000,50000,50000,50000,50000,50000,50000,50000,50000,50000]
   },
   US: {
-    MRR: [380000,380000,380000,580000,580000,580000,580000,580000,580000,480000,480000,420000],
-    EmFin: [150000,150000,150000,150000,150000,150000,150000,150000,150000,150000,150000,150000],
-  },
+    MRR:[380000,380000,380000,580000,580000,580000,580000,580000,580000,480000,480000,420000],
+    EmFin:[150000,150000,150000,150000,150000,150000,150000,150000,150000,150000,150000,150000]
+  }
 };
 
 const INIT_REPS = [
@@ -81,36 +72,36 @@ const INIT_REPS = [
   {n:"Rachelle Serneo",t:"SME Strikers",s:"maternity"},{n:"Mat Galuego",t:"Channels"},
   {n:"Ric Rogodon",t:"Upsell"},{n:"Chress Espineda",t:"Upsell"},
   {n:"Kurt Ang",t:"Upsell"},{n:"Javier Lopez",t:"Upsell"},
-  {n:"Thea Estrella",t:"Upsell",s:"resigned"},
+  {n:"Thea Estrella",t:"Upsell",s:"resigned"}
 ];
 
-const fmt  = n => n===0?"₱0":`₱${Number(n).toLocaleString()}`;
-const fmtK = n => n===0?"₱0":`₱${(n/1000).toFixed(0)}K`;
+const fmt  = n => n===0?"₱0":"₱"+Number(n).toLocaleString();
+const fmtK = n => n===0?"₱0":"₱"+(n/1000).toFixed(0)+"K";
 const pct  = (a,t) => t===0?0:Math.round(a/t*10000)/100;
 const aC   = p => p>=100?"#16a34a":p>=80?"#2563eb":p>=60?"#ea580c":"#dc2626";
 const aBg  = p => p>=100?"#dcfce7":p>=80?"#dbeafe":p>=60?"#ffedd5":"#fee2e2";
 
-const emptyRepData = () => {
-  const d={};
-  ADJ.forEach(a=>{d[a]={};MONTHS.forEach(m=>{d[a][m]={T:0,A:0};});});
+function emptyRep() {
+  var d={};
+  ADJ.forEach(function(a){d[a]={};MONTHS.forEach(function(m){d[a][m]={T:0,A:0};});});
   return d;
-};
+}
 
-const buildData = () => {
-  const d={};
-  INIT_REPS.forEach(r=>{d[r.n]=emptyRepData();});
-  const s=(n,mT,mA,eT,eA)=>{
+function buildData() {
+  var d={};
+  INIT_REPS.forEach(function(r){d[r.n]=emptyRep();});
+  function s(n,mT,mA,eT,eA){
     if(!d[n])return;
-    MONTHS.forEach((m,i)=>{d[n].MRR[m]={T:mT[i]||0,A:mA[i]||0};d[n]["E/F"][m]={T:eT[i]||0,A:eA[i]||0};});
-  };
+    MONTHS.forEach(function(m,i){d[n].MRR[m]={T:mT[i]||0,A:mA[i]||0};d[n]["E/F"][m]={T:eT[i]||0,A:eA[i]||0};});
+  }
   s("Katryn Saldajeno",[80000,80000,100000,120000,120000,120000,120000,120000,120000,110000,110000,100000],[10000,426000,61000,0,0,0,0,0,0,0,0,0],[7500,7500,7500,7500,7500,7500,7500,7500,7500,7500,7500,7500],[1700,5000,5000,0,0,0,0,0,0,0,0,0]);
   s("Mariam Pulido",[80000,80000,100000,120000,120000,120000,120000,120000,120000,110000,110000,100000],[17500,0,0,0,0,0,0,0,0,0,0,0],[7500,7500,7500,7500,7500,7500,7500,7500,7500,7500,7500,7500],[500,0,0,0,0,0,0,0,0,0,0,0]);
   s("Justin Bernabe",[60000,60000,80000,0,0,0,0,0,0,0,0,0],[39000,0,0,0,0,0,0,0,0,0,0,0],[7500,7500,7500,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0]);
-  s("TBH ENT Builders",[0,0,0,0,110000,110000,110000,110000,90000,75000,75000,0],[],[0,0,0,0,7500,7500,7500,7500,7500,7500,7500,0],[]);
+  s("TBH ENT Builders",[0,0,0,0,110000,110000,110000,110000,90000,75000,75000,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,7500,7500,7500,7500,7500,7500,7500,0],[0,0,0,0,0,0,0,0,0,0,0,0]);
   s("Lana Pineda",[80000,80000,100000,120000,120000,120000,120000,120000,120000,110000,110000,100000],[0,0,20000,0,0,0,0,0,0,0,0,0],[7500,7500,7500,7500,7500,7500,7500,7500,7500,7500,7500,7500],[0,0,2500,0,0,0,0,0,0,0,0,0]);
   s("Crystel Ambrosio",[80000,80000,100000,120000,120000,120000,120000,120000,120000,110000,110000,100000],[190972,0,288550,0,0,0,0,0,0,0,0,0],[7500,7500,7500,7500,7500,7500,7500,7500,7500,7500,7500,7500],[25000,0,0,0,0,0,0,0,0,0,0,0]);
-  s("Allyssa Atienza",[80000,80000,100000,0,0,0,0,0,0,0,0,0],[],[7500,7500,0,0,0,0,0,0,0,0,0,0],[]);
-  s("TBH ENT Hunters",[0,0,0,0,0,110000,110000,110000,110000,90000,75000,75000],[],[0,0,0,0,0,7500,7500,7500,7500,7500,7500,7500],[]);
+  s("Allyssa Atienza",[80000,80000,100000,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[7500,7500,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0]);
+  s("TBH ENT Hunters",[0,0,0,0,0,110000,110000,110000,110000,90000,75000,75000],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,7500,7500,7500,7500,7500,7500,7500],[0,0,0,0,0,0,0,0,0,0,0,0]);
   s("Ferdie Salvosa",[60000,60000,60000,100000,100000,100000,100000,100000,100000,75000,75000,75000],[73200,125000,75000,0,0,0,0,0,0,0,0,0],[5000,5000,5000,5000,5000,5000,5000,5000,5000,5000,5000,5000],[9600,14300,16500,0,0,0,0,0,0,0,0,0]);
   s("Reine Suarez",[60000,60000,60000,100000,100000,100000,100000,100000,100000,75000,75000,75000],[64875,87650,50200,0,0,0,0,0,0,0,0,0],[5000,5000,5000,5000,5000,5000,5000,5000,5000,5000,5000,5000],[16250,14750,5000,0,0,0,0,0,0,0,0,0]);
   s("Rona Pablo",[60000,60000,60000,100000,100000,100000,100000,100000,100000,75000,75000,75000],[53000,110500,27500,0,0,0,0,0,0,0,0,0],[5000,5000,5000,5000,5000,5000,5000,5000,5000,5000,5000,5000],[5000,22750,1750,0,0,0,0,0,0,0,0,0]);
@@ -121,7 +112,7 @@ const buildData = () => {
   s("Riezhel Punzalan",[60000,60000,80000,110000,110000,110000,110000,110000,110000,90000,75000,75000],[12000,139800,0,0,0,0,0,0,0,0,0,0],[5000,5000,5000,5000,5000,5000,5000,5000,5000,5000,5000,5000],[0,12000,0,0,0,0,0,0,0,0,0,0]);
   s("Rizzalyn Berce",[60000,60000,80000,110000,110000,110000,110000,110000,110000,90000,75000,75000],[105250,120210,12500,0,0,0,0,0,0,0,0,0],[5000,5000,5000,5000,5000,5000,5000,5000,5000,5000,5000,5000],[16750,16500,2150,0,0,0,0,0,0,0,0,0]);
   s("Akisha Abella",[60000,60000,60000,100000,100000,100000,100000,100000,100000,75000,75000,75000],[75000,108000,29000,0,0,0,0,0,0,0,0,0],[5000,5000,5000,5000,5000,5000,5000,5000,5000,5000,5000,5000],[6500,8850,3500,0,0,0,0,0,0,0,0,0]);
-  s("Brian Azarcon",[60000,60000,60000,100000,100000,100000,100000,100000,100000,75000,75000,75000],[0,0,26000,0,0,0,0,0,0,0,0,0],[5000,5000,5000,5000,5000,5000,5000,5000,5000,5000,5000,5000],[]);
+  s("Brian Azarcon",[60000,60000,60000,100000,100000,100000,100000,100000,100000,75000,75000,75000],[0,0,26000,0,0,0,0,0,0,0,0,0],[5000,5000,5000,5000,5000,5000,5000,5000,5000,5000,5000,5000],[0,0,0,0,0,0,0,0,0,0,0,0]);
   s("Herbert Salvaleon",[60000,60000,0,0,0,0,0,0,0,0,0,0],[37250,0,0,0,0,0,0,0,0,0,0,0],[5000,5000,0,0,0,0,0,0,0,0,0,0],[6400,0,0,0,0,0,0,0,0,0,0,0]);
   s("Rachelle Serneo",[60000,60000,0,0,100000,100000,100000,75000,75000,75000,0,0],[21000,51500,0,0,0,0,0,0,0,0,0,0],[5000,5000,0,0,5000,5000,5000,5000,5000,5000,0,0],[1750,3250,0,0,0,0,0,0,0,0,0,0]);
   s("Mat Galuego",[60000,60000,80000,110000,110000,110000,110000,110000,110000,90000,75000,75000],[98300,60500,27833,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,100000,0],[0,9350,0,0,0,0,0,0,0,0,0,0]);
@@ -131,160 +122,198 @@ const buildData = () => {
   s("Javier Lopez",[80000,80000,80000,120000,120000,120000,120000,120000,120000,100000,100000,100000],[36415,73825,0,0,0,0,0,0,0,0,0,0],[30000,30000,30000,30000,30000,30000,30000,30000,30000,30000,30000,30000],[0,53300,63600,0,0,0,0,0,0,0,0,0]);
   s("Thea Estrella",[70000,70000,70000,0,0,0,0,0,0,0,0,0],[4200,4636,0,0,0,0,0,0,0,0,0,0],[20000,20000,20000,0,0,0,0,0,0,0,0,0],[6500,13400,0,0,0,0,0,0,0,0,0,0]);
   return d;
-};
+}
 
-const buildMeta = () => {
-  const d={};
-  INIT_REPS.forEach(r=>{d[r.n]={fc:0,ef:false,mq:false,nl:0};});
-  const seeds={"Katryn Saldajeno":{fc:22000,ef:false,mq:true,nl:2},"Crystel Ambrosio":{fc:288280,ef:true,mq:true,nl:1},"Ferdie Salvosa":{fc:79500,ef:true,mq:true,nl:4},"Osheri Fima":{fc:101250,ef:true,mq:false,nl:2},"Rizzalyn Berce":{fc:57580,ef:false,mq:false,nl:1},"Akisha Abella":{fc:74000,ef:false,mq:false,nl:2},"Reine Suarez":{fc:68200,ef:true,mq:false,nl:3},"Rona Pablo":{fc:76370,ef:false,mq:false,nl:2},"Jethro Jamelo":{fc:85000,ef:true,mq:false,nl:2},"Mat Galuego":{fc:69500,ef:false,mq:false,nl:2},"Gel Riboroso":{fc:66500,ef:false,mq:false,nl:1},"Riezhel Punzalan":{fc:48200,ef:false,mq:false,nl:0},"Nicco Tioseco":{fc:94300,ef:false,mq:false,nl:3},"Brian Azarcon":{fc:0,ef:false,mq:false,nl:2},"Lana Pineda":{fc:97750,ef:false,mq:false,nl:1},"Mariam Pulido":{fc:486880,ef:false,mq:false,nl:0}};
-  Object.entries(seeds).forEach(([k,v])=>{if(d[k])d[k]=v;});
+function buildMeta() {
+  var d={};
+  INIT_REPS.forEach(function(r){d[r.n]={fc:0,ef:false,mq:false,nl:0};});
+  var seeds={"Katryn Saldajeno":{fc:22000,ef:false,mq:true,nl:2},"Crystel Ambrosio":{fc:288280,ef:true,mq:true,nl:1},"Ferdie Salvosa":{fc:79500,ef:true,mq:true,nl:4},"Osheri Fima":{fc:101250,ef:true,mq:false,nl:2},"Rizzalyn Berce":{fc:57580,ef:false,mq:false,nl:1},"Akisha Abella":{fc:74000,ef:false,mq:false,nl:2},"Reine Suarez":{fc:68200,ef:true,mq:false,nl:3},"Rona Pablo":{fc:76370,ef:false,mq:false,nl:2},"Jethro Jamelo":{fc:85000,ef:true,mq:false,nl:2},"Mat Galuego":{fc:69500,ef:false,mq:false,nl:2},"Gel Riboroso":{fc:66500,ef:false,mq:false,nl:1},"Riezhel Punzalan":{fc:48200,ef:false,mq:false,nl:0},"Nicco Tioseco":{fc:94300,ef:false,mq:false,nl:3},"Brian Azarcon":{fc:0,ef:false,mq:false,nl:2},"Lana Pineda":{fc:97750,ef:false,mq:false,nl:1},"Mariam Pulido":{fc:486880,ef:false,mq:false,nl:0}};
+  Object.keys(seeds).forEach(function(k){if(d[k])d[k]=seeds[k];});
   return d;
-};
+}
 
-const buildAccel = () => {
-  const d={};
-  INIT_REPS.forEach(r=>{d[r.n]={};MONTHS.forEach(m=>{d[r.n][m]=null;});});
-  const hits={"Mat Galuego":{Jan:true,Feb:true},"Crystel Ambrosio":{Feb:true},"Rona Pablo":{Jan:false,Feb:true},"Ferdie Salvosa":{Jan:true,Feb:true,Mar:true},"Jethro Jamelo":{Jan:true,Feb:true},"Reine Suarez":{Jan:true,Feb:true},"Gel Riboroso":{Jan:true,Feb:true},"Nicco Tioseco":{Jan:false,Feb:false},"Brian Azarcon":{Jan:false,Feb:false},"Osheri Fima":{Jan:false,Feb:true},"Akisha Abella":{Jan:true,Feb:true},"Rizzalyn Berce":{Jan:true,Feb:true},"Rachelle Serneo":{Jan:false,Feb:false},"Riezhel Punzalan":{Jan:false,Feb:true},"Chress Espineda":{Jan:false,Feb:false},"Kurt Ang":{Jan:true,Feb:false},"Thea Estrella":{Jan:false,Feb:false}};
-  Object.entries(hits).forEach(([name,months])=>{if(d[name])Object.entries(months).forEach(([m,v])=>{d[name][m]=v;});});
+function buildAccel() {
+  var d={};
+  INIT_REPS.forEach(function(r){d[r.n]={};MONTHS.forEach(function(m){d[r.n][m]=null;});});
+  var hits={"Mat Galuego":{Jan:true,Feb:true},"Crystel Ambrosio":{Feb:true},"Rona Pablo":{Jan:false,Feb:true},"Ferdie Salvosa":{Jan:true,Feb:true,Mar:true},"Jethro Jamelo":{Jan:true,Feb:true},"Reine Suarez":{Jan:true,Feb:true},"Gel Riboroso":{Jan:true,Feb:true},"Nicco Tioseco":{Jan:false,Feb:false},"Brian Azarcon":{Jan:false,Feb:false},"Osheri Fima":{Jan:false,Feb:true},"Akisha Abella":{Jan:true,Feb:true},"Rizzalyn Berce":{Jan:true,Feb:true},"Rachelle Serneo":{Jan:false,Feb:false},"Riezhel Punzalan":{Jan:false,Feb:true},"Chress Espineda":{Jan:false,Feb:false},"Kurt Ang":{Jan:true,Feb:false},"Thea Estrella":{Jan:false,Feb:false}};
+  Object.keys(hits).forEach(function(name){if(d[name]){var months=hits[name];Object.keys(months).forEach(function(m){d[name][m]=months[m];});}});
   return d;
-};
+}
 
-const Badge = ({s}) => {
-  if(!s||!STATUS_CFG[s])return null;
-  const c=STATUS_CFG[s];
-  return <span style={{fontSize:10,padding:"1px 6px",borderRadius:10,background:c.bg,color:c.color,fontWeight:600,whiteSpace:"nowrap"}}>{c.label}</span>;
-};
-const Chip = ({p}) => <span style={{display:"inline-block",padding:"2px 8px",borderRadius:20,fontWeight:700,fontSize:12,background:aBg(p),color:aC(p)}}>{p.toFixed(1)}%</span>;
+function buildSegActuals() {
+  var d={};
+  SEGS.forEach(function(seg){d[seg]={MRR:{},EmFin:{}};MONTHS.forEach(function(m){d[seg].MRR[m]=0;d[seg].EmFin[m]=0;});});
+  d.ENT.MRR={Jan:369522,Feb:470000,Mar:306883,Apr:0,May:0,Jun:0,Jul:0,Aug:0,Sep:0,Oct:0,Nov:0,Dec:0};
+  d.ENT.EmFin={Jan:20000,Feb:17500,Mar:0,Apr:0,May:0,Jun:0,Jul:0,Aug:0,Sep:0,Oct:0,Nov:0,Dec:0};
+  d.SME.MRR={Jan:797090,Feb:1039680,Mar:463200,Apr:0,May:0,Jun:0,Jul:0,Aug:0,Sep:0,Oct:0,Nov:0,Dec:0};
+  d.SME.EmFin={Jan:88990,Feb:122850,Mar:49300,Apr:0,May:0,Jun:0,Jul:0,Aug:0,Sep:0,Oct:0,Nov:0,Dec:0};
+  d.US.MRR={Jan:571361,Feb:390686,Mar:45000,Apr:0,May:0,Jun:0,Jul:0,Aug:0,Sep:0,Oct:0,Nov:0,Dec:0};
+  d.US.EmFin={Jan:87050,Feb:123300,Mar:109900,Apr:0,May:0,Jun:0,Jul:0,Aug:0,Sep:0,Oct:0,Nov:0,Dec:0};
+  return d;
+}
+
+function Badge(props) {
+  if(!props.s||!STCFG[props.s])return null;
+  var c=STCFG[props.s];
+  return React.createElement('span',{style:{fontSize:10,padding:"1px 6px",borderRadius:10,background:c.bg,color:c.color,fontWeight:600,whiteSpace:"nowrap"}},c.label);
+}
+function Chip(props) {
+  return React.createElement('span',{style:{display:"inline-block",padding:"2px 8px",borderRadius:20,fontWeight:700,fontSize:12,background:aBg(props.p),color:aC(props.p)}},props.p.toFixed(1)+"%");
+}
 
 function App() {
-  const [tab, setTab]             = useState(0);
-  const [data, setData]           = useState(buildData);
-  const [meta, setMeta]           = useState(buildMeta);
-  const [accel, setAccel]         = useState(buildAccel);
-  const [reps, setReps]           = useState(INIT_REPS);
-  const [curMon, setCurMon]       = useState("Mar");
-  const [selTeam, setSelTeam]     = useState("ENT Builders");
-  const [selAdj, setSelAdj]       = useState("MRR");
-  const [editId, setEditId]       = useState(null);
-  const [showInactive, setShowInactive] = useState(false);
-  const [sortCol, setSortCol]     = useState(null);
-  const [sortDir, setSortDir]     = useState("desc");
-  const [showAdd, setShowAdd]     = useState(false);
-  const [newRep, setNewRep]       = useState({name:"",team:"ENT Builders",status:""});
-  const [dbReady, setDbReady]     = useState(false);
-  const [saving, setSaving]       = useState(false);
-  const [lastSaved, setLastSaved] = useState(null);
-    const d={};
-    SEGMENTS.forEach(seg=>{d[seg]={MRR:{},EmFin:{}}; MONTHS.forEach(m=>{d[seg].MRR[m]=0;d[seg].EmFin[m]=0;});});
-    d.ENT.MRR={Jan:369522,Feb:470000,Mar:306883,Apr:0,May:0,Jun:0,Jul:0,Aug:0,Sep:0,Oct:0,Nov:0,Dec:0};
-    d.ENT.EmFin={Jan:20000,Feb:17500,Mar:0,Apr:0,May:0,Jun:0,Jul:0,Aug:0,Sep:0,Oct:0,Nov:0,Dec:0};
-    d.SME.MRR={Jan:797090,Feb:1039680,Mar:463200,Apr:0,May:0,Jun:0,Jul:0,Aug:0,Sep:0,Oct:0,Nov:0,Dec:0};
-    d.SME.EmFin={Jan:88990,Feb:122850,Mar:49300,Apr:0,May:0,Jun:0,Jul:0,Aug:0,Sep:0,Oct:0,Nov:0,Dec:0};
-    d.US.MRR={Jan:571361,Feb:390686,Mar:45000,Apr:0,May:0,Jun:0,Jul:0,Aug:0,Sep:0,Oct:0,Nov:0,Dec:0};
-    d.US.EmFin={Jan:87050,Feb:123300,Mar:109900,Apr:0,May:0,Jun:0,Jul:0,Aug:0,Sep:0,Oct:0,Nov:0,Dec:0};
-    return d;
-  });
-  const [saving, setSaving]       = useState(false);
-  const [lastSaved, setLastSaved] = useState(null);
+  var S = useState;
+  var tab=S(0),data=S(buildData),meta=S(buildMeta),accel=S(buildAccel),reps=S(INIT_REPS),segA=S(buildSegActuals);
+  var curMon=S("Mar"),selTeam=S("ENT Builders"),selAdj=S("MRR"),editId=S(null);
+  var showInactive=S(false),sortCol=S(null),sortDir=S("desc"),showAdd=S(false);
+  var newRep=S({name:"",team:"ENT Builders",status:""});
+  var dbReady=S(false),saving=S(false),lastSaved=S(null);
 
-  // Wait for Firebase to be ready
-  useEffect(() => {
-    if (window.__firestoreReady) { setDbReady(true); return; }
-    window.addEventListener("firebaseReady", () => setDbReady(true), {once:true});
-  }, []);
+  var setTab=tab[1];tab=tab[0];
+  var setData=data[1];data=data[0];
+  var setMeta=meta[1];meta=meta[0];
+  var setAccel=accel[1];accel=accel[0];
+  var setReps=reps[1];reps=reps[0];
+  var setSegA=segA[1];segA=segA[0];
+  var setCurMon=curMon[1];curMon=curMon[0];
+  var setSelTeam=selTeam[1];selTeam=selTeam[0];
+  var setSelAdj=selAdj[1];selAdj=selAdj[0];
+  var setEditId=editId[1];editId=editId[0];
+  var setShowInactive=showInactive[1];showInactive=showInactive[0];
+  var setSortCol=sortCol[1];sortCol=sortCol[0];
+  var setSortDir=sortDir[1];sortDir=sortDir[0];
+  var setShowAdd=showAdd[1];showAdd=showAdd[0];
+  var setNewRep=newRep[1];newRep=newRep[0];
+  var setDbReady=dbReady[1];dbReady=dbReady[0];
+  var setSaving=saving[1];saving=saving[0];
+  var setLastSaved=lastSaved[1];lastSaved=lastSaved[0];
 
-  // Load data from Firestore on mount
-  useEffect(() => {
-    if (!dbReady) return;
-    const db = window.__db;
-    const unsub = window.__onSnapshot(window.__doc(db, "tracker", "state"), (snap) => {
-      if (snap.exists()) {
-        const d = snap.data();
-        if (d.data)  setData(d.data);
-        if (d.meta)  setMeta(d.meta);
-        if (d.accel) setAccel(d.accel);
-        if (d.reps)  setReps(d.reps);
-        if (d.segActuals) setSegActuals(d.segActuals);
+  var mi = MONTHS.indexOf(curMon);
+
+  useEffect(function(){
+    if(window.__firestoreReady){setDbReady(true);return;}
+    window.addEventListener("firebaseReady",function(){setDbReady(true);},{once:true});
+  },[]);
+
+  useEffect(function(){
+    if(!dbReady)return;
+    var unsub=window.__onSnapshot(window.__doc(window.__db,"tracker","state"),function(snap){
+      if(snap.exists()){
+        var d=snap.data();
+        if(d.data)setData(d.data);
+        if(d.meta)setMeta(d.meta);
+        if(d.accel)setAccel(d.accel);
+        if(d.reps)setReps(d.reps);
+        if(d.segA)setSegA(d.segA);
+        if(d.curMon)setCurMon(d.curMon);
       }
     });
-    return () => unsub();
-  }, [dbReady]);
+    return function(){unsub();};
+  },[dbReady]);
 
-  // Save to Firestore
-  const save = useCallback(async (newState) => {
-    if (!dbReady) return;
+  var save=useCallback(function(obj){
+    if(!dbReady)return;
     setSaving(true);
-    try {
-      await window.__setDoc(window.__doc(window.__db, "tracker", "state"), newState, {merge:true});
-      setLastSaved(new Date().toLocaleTimeString());
-    } catch(e) { console.error("Save error", e); }
-    setSaving(false);
-  }, [dbReady]);
+    window.__setDoc(window.__doc(window.__db,"tracker","state"),obj,{merge:true}).then(function(){
+      setLastSaved(new Date().toLocaleTimeString());setSaving(false);
+    }).catch(function(){setSaving(false);});
+  },[dbReady]);
 
-  const mi = MONTHS.indexOf(curMon);
+  function ytdA(n){return MONTHS.slice(0,mi+1).reduce(function(s,m){return s+((data[n]&&data[n].MRR[m]?data[n].MRR[m].A:0));},0);}
+  function ytdT(n){return MONTHS.slice(0,mi+1).reduce(function(s,m){return s+((data[n]&&data[n].MRR[m]?data[n].MRR[m].T:0));},0);}
+  function monA(n){return data[n]&&data[n].MRR[curMon]?data[n].MRR[curMon].A:0;}
 
-  const setActual = (rep,a,mon,val) => {
-    setData(p => {
-      const repData = Object.assign({}, p[rep]);
-      const adjData = Object.assign({}, repData[a]);
-      const monData = Object.assign({}, adjData[mon], {A: Number(val)||0});
-      adjData[mon] = monData;
-      repData[a] = adjData;
-      const nd = Object.assign({}, p);
-      nd[rep] = repData;
-      save({data:nd});
-      return nd;
+  function summary(n){
+    var r={};
+    ADJ.forEach(function(a){
+      var T=0,A=0;
+      MONTHS.forEach(function(m){T+=(data[n]&&data[n][a]&&data[n][a][m]?data[n][a][m].T:0);A+=(data[n]&&data[n][a]&&data[n][a][m]?data[n][a][m].A:0);});
+      r[a]={T:T,A:A,p:pct(A,T)};
     });
-  };
+    var T=ADJ.reduce(function(s,a){return s+r[a].T;},0),A=ADJ.reduce(function(s,a){return s+r[a].A;},0);
+    r.all={T:T,A:A,p:pct(A,T)};
+    return r;
+  }
 
-  const setMetaF = (rep,field,val) => {
-    setMeta(p => {
-      const nm = {...p,[rep]:{...p[rep],[field]:val}};
-      save({meta:nm}); return nm;
+  var activeReps=reps.filter(function(r){return !r.s;});
+  var shownReps=showInactive?reps:activeReps;
+
+  function togSort(col){if(sortCol===col)setSortDir(function(d){return d==="desc"?"asc":"desc";});else{setSortCol(col);setSortDir("desc");}}
+
+  var sortedReps=useMemo(function(){
+    return shownReps.slice().sort(function(a,b){
+      if(!sortCol)return 0;
+      var va=sortCol==="att"?pct(ytdA(a.n),ytdT(a.n)):ytdA(a.n);
+      var vb=sortCol==="att"?pct(ytdA(b.n),ytdT(b.n)):ytdA(b.n);
+      return sortDir==="desc"?vb-va:va-vb;
     });
-  };
+  },[shownReps,sortCol,sortDir,data,curMon]);
 
-  const toggleAccel = (rep,mon) => {
-    setAccel(p => {
-      const cur=p[rep]?.[mon], next=cur===null?true:cur===true?false:null;
-      const na = {...p,[rep]:{...p[rep],[mon]:next}};
-      save({accel:na}); return na;
+  var lbReps=useMemo(function(){
+    return shownReps.map(function(r){var s=summary(r.n);s.n=r.n;s.t=r.t;s.s=r.s;s.ytdP=pct(ytdA(r.n),ytdT(r.n));return s;}).sort(function(a,b){return b.ytdP-a.ytdP;});
+  },[shownReps,data,curMon]);
+
+  var totYtdT=activeReps.reduce(function(s,r){return s+ytdT(r.n);},0);
+  var totYtdA=activeReps.reduce(function(s,r){return s+ytdA(r.n);},0);
+  var totFc=activeReps.reduce(function(s,r){return s+(meta[r.n]?meta[r.n].fc:0);},0);
+  var totMonA=activeReps.reduce(function(s,r){return s+monA(r.n);},0);
+  var totNL=activeReps.reduce(function(s,r){return s+(meta[r.n]?meta[r.n].nl:0);},0);
+
+  function setActual(rep,a,mon,val){
+    setData(function(p){
+      var nd=Object.assign({},p);
+      nd[rep]=Object.assign({},p[rep]);
+      nd[rep][a]=Object.assign({},p[rep][a]);
+      nd[rep][a][mon]=Object.assign({},p[rep][a][mon],{A:Number(val)||0});
+      save({data:nd});return nd;
     });
-  };
+  }
 
-  const changeMonth = (m) => { setCurMon(m); save({curMon:m}); };
+  function setMetaF(rep,field,val){
+    setMeta(function(p){
+      var nm=Object.assign({},p);
+      nm[rep]=Object.assign({},p[rep]);
+      nm[rep][field]=val;
+      save({meta:nm});return nm;
+    });
+  }
 
-  const ytdA = n => MONTHS.slice(0,mi+1).reduce((s,m)=>s+(data[n]?.MRR[m]?.A||0),0);
-  const ytdT = n => MONTHS.slice(0,mi+1).reduce((s,m)=>s+(data[n]?.MRR[m]?.T||0),0);
-  const monA = n => data[n]?.MRR[curMon]?.A||0;
+  function toggleAccel(rep,mon){
+    setAccel(function(p){
+      var cur=p[rep]?p[rep][mon]:null;
+      var next=cur===null?true:cur===true?false:null;
+      var na=Object.assign({},p);
+      na[rep]=Object.assign({},p[rep]);
+      na[rep][mon]=next;
+      save({accel:na});return na;
+    });
+  }
 
-  const summary = n => {
-    const r={};
-    ADJ.forEach(a=>{let T=0,A=0;MONTHS.forEach(m=>{T+=data[n]?.[a]?.[m]?.T||0;A+=data[n]?.[a]?.[m]?.A||0;});r[a]={T,A,p:pct(A,T)};});
-    const T=ADJ.reduce((s,a)=>s+r[a].T,0),A=ADJ.reduce((s,a)=>s+r[a].A,0);
-    r.all={T,A,p:pct(A,T)}; return r;
-  };
+  function setSegActual(seg,adj,mon,val){
+    setSegA(function(p){
+      var ns=Object.assign({},p);
+      ns[seg]=Object.assign({},p[seg]);
+      ns[seg][adj]=Object.assign({},p[seg][adj]);
+      ns[seg][adj][mon]=Number(val)||0;
+      save({segA:ns});return ns;
+    });
+  }
 
-  const activeReps = reps.filter(r=>!r.s);
-  const shownReps  = showInactive?reps:activeReps;
-  const togSort = col => { if(sortCol===col)setSortDir(d=>d==="desc"?"asc":"desc"); else{setSortCol(col);setSortDir("desc");} };
-  const sortedReps = useMemo(()=>[...shownReps].sort((a,b)=>{if(!sortCol)return 0;const va=sortCol==="att"?pct(ytdA(a.n),ytdT(a.n)):ytdA(a.n);const vb=sortCol==="att"?pct(ytdA(b.n),ytdT(b.n)):ytdA(b.n);return sortDir==="desc"?vb-va:va-vb;}),[shownReps,sortCol,sortDir,data,curMon]);
-  const lbReps = useMemo(()=>[...shownReps].map(r=>({...r,...summary(r.n),ytdP:pct(ytdA(r.n),ytdT(r.n))})).sort((a,b)=>b.ytdP-a.ytdP),[shownReps,data,curMon]);
+  function changeMonth(m){setCurMon(m);save({curMon:m});}
 
-  const totYtdT=activeReps.reduce((s,r)=>s+ytdT(r.n),0),totYtdA=activeReps.reduce((s,r)=>s+ytdA(r.n),0),totFc=activeReps.reduce((s,r)=>s+(meta[r.n]?.fc||0),0),totMonA=activeReps.reduce((s,r)=>s+monA(r.n),0),totNL=activeReps.reduce((s,r)=>s+(meta[r.n]?.nl||0),0);
-
-  const addRep = () => {
+  function addRep(){
     if(!newRep.name.trim())return;
-    const r={n:newRep.name.trim(),t:newRep.team,...(newRep.status?{s:newRep.status}:{})};
-    const nr=[...reps,r];
+    var r={n:newRep.name.trim(),t:newRep.team};
+    if(newRep.status)r.s=newRep.status;
+    var nr=reps.concat([r]);
     setReps(nr);
-    setData(p=>{const d={...p};d[r.n]=emptyRepData();save({data:d,reps:nr});return d;});
-    setMeta(p=>{const m={...p,[r.n]:{fc:0,ef:false,mq:false,nl:0}};return m;});
-    setAccel(p=>{const d={...p};d[r.n]={};MONTHS.forEach(m=>{d[r.n][m]=null;});return d;});
+    setData(function(p){var d=Object.assign({},p);d[r.n]=emptyRep();save({data:d,reps:nr});return d;});
+    setMeta(function(p){var m=Object.assign({},p);m[r.n]={fc:0,ef:false,mq:false,nl:0};return m;});
+    setAccel(function(p){var a=Object.assign({},p);a[r.n]={};MONTHS.forEach(function(m){a[r.n][m]=null;});return a;});
     setNewRep({name:"",team:"ENT Builders",status:""});setShowAdd(false);
-  };
+  }
 
-  const thS=(ex={})=>({padding:"8px 8px",color:"#fff",background:"#1e3a8a",...ex});
+  var ths = function(ex){return Object.assign({padding:"8px 8px",color:"#fff",background:"#1e3a8a"},ex||{});};
 
   return (
     <div style={{fontFamily:"Inter,sans-serif",fontSize:13,background:"#f8fafc",minHeight:"100vh"}}>
@@ -294,95 +323,88 @@ function App() {
           <div style={{opacity:.8,fontSize:11,marginTop:2}}>6 Teams · {activeReps.length} Active Reps · ₱ PHP</div>
         </div>
         <div style={{display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}>
-          <div style={{fontSize:11,opacity:.8}}>
-            {!dbReady?"⏳ Connecting...":saving?"💾 Saving...":lastSaved?`✅ Saved ${lastSaved}`:"✅ Connected"}
-          </div>
+          <div style={{fontSize:11,opacity:.8}}>{!dbReady?"⏳ Connecting...":saving?"💾 Saving...":lastSaved?"✅ Saved "+lastSaved:"✅ Connected"}</div>
           <div style={{display:"flex",alignItems:"center",gap:8}}>
             <span style={{fontSize:12,opacity:.8}}>Month:</span>
-            <select value={curMon} onChange={e=>changeMonth(e.target.value)} style={{padding:"4px 8px",borderRadius:6,border:"none",fontSize:13,fontWeight:600,color:"#1e3a8a",background:"#fff"}}>
-              {MONTHS.map(m=><option key={m}>{m}</option>)}
+            <select value={curMon} onChange={function(e){changeMonth(e.target.value);}} style={{padding:"4px 8px",borderRadius:6,border:"none",fontSize:13,fontWeight:600,color:"#1e3a8a",background:"#fff"}}>
+              {MONTHS.map(function(m){return <option key={m}>{m}</option>;})}
             </select>
           </div>
         </div>
       </div>
 
       <div style={{display:"flex",background:"#fff",borderBottom:"1px solid #e2e8f0",paddingLeft:12,overflowX:"auto"}}>
-        {TABS.map((t,i)=><button key={i} onClick={()=>setTab(i)} style={{padding:"10px 14px",border:"none",background:"none",cursor:"pointer",whiteSpace:"nowrap",fontWeight:tab===i?700:400,color:tab===i?"#2563eb":"#64748b",borderBottom:tab===i?"2px solid #2563eb":"2px solid transparent",fontSize:13}}>{t}</button>)}
+        {TABS.map(function(t,i){return <button key={i} onClick={function(){setTab(i);}} style={{padding:"10px 14px",border:"none",background:"none",cursor:"pointer",whiteSpace:"nowrap",fontWeight:tab===i?700:400,color:tab===i?"#2563eb":"#64748b",borderBottom:tab===i?"2px solid #2563eb":"2px solid transparent",fontSize:13}}>{t}</button>;})}
       </div>
 
       <div style={{padding:14}}>
 
         {tab===0&&<div>
           <b style={{color:"#1e3a8a",fontSize:15,display:"block",marginBottom:14}}>📊 Segment Summary</b>
-          {["MRR","EF"].map(adj=>{
-            const adjLabel = adj==="EF"?"E/F":"MRR";
-            const grandTotT=SEGMENTS.reduce((s,seg)=>s+MONTHS.reduce((ss,m,i)=>ss+(SEG_TARGETS[seg][adj][i]||0),0),0);
-            const grandTotA=SEGMENTS.reduce((s,seg)=>s+MONTHS.reduce((ss,m)=>ss+(segActuals[seg][adj][m]||0),0),0);
-            const grandYtdT=SEGMENTS.reduce((s,seg)=>s+MONTHS.slice(0,mi+1).reduce((ss,m,i)=>ss+(SEG_TARGETS[seg][adj][i]||0),0),0);
-            const grandYtdA=SEGMENTS.reduce((s,seg)=>s+MONTHS.slice(0,mi+1).reduce((ss,m)=>ss+(segActuals[seg][adj][m]||0),0),0);
+          {["MRR","EmFin"].map(function(adj){
+            var adjLabel=adj==="EmFin"?"E/F":"MRR";
             return <div key={adj} style={{marginBottom:24}}>
               <div style={{fontWeight:700,fontSize:12,color:"#475569",marginBottom:8,textTransform:"uppercase",letterSpacing:1}}>{adjLabel}</div>
               <div style={{overflowX:"auto"}}>
                 <table style={{borderCollapse:"collapse",width:"100%",background:"#fff",borderRadius:8,boxShadow:"0 1px 3px rgba(0,0,0,.08)",fontSize:12}}>
                   <thead>
                     <tr style={{background:"#1e3a8a",color:"#fff"}}>
-                      <th style={{padding:"8px 12px",textAlign:"left",minWidth:80}}>Segment</th>
-                      <th style={{padding:"8px 6px",textAlign:"center",width:70}}>Row</th>
-                      {MONTHS.map(m=><th key={m} style={{padding:"8px 5px",textAlign:"right",minWidth:75}}>{m}</th>)}
+                      <th style={{padding:"8px 12px",textAlign:"left",minWidth:90}}>Segment</th>
+                      <th style={{padding:"8px 6px",textAlign:"center",width:60}}>Row</th>
+                      {MONTHS.map(function(m){return <th key={m} style={{padding:"8px 5px",textAlign:"right",minWidth:75}}>{m}</th>;})}
                       <th style={{padding:"8px 8px",textAlign:"right",minWidth:95}}>Total</th>
                       <th style={{padding:"8px 8px",textAlign:"right",minWidth:95}}>YTD</th>
                       <th style={{padding:"8px 8px",textAlign:"center",minWidth:70}}>Ach%</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {[...SEGMENTS,"Sales"].map((seg,si)=>{
-                      const isGrand = seg==="Sales";
-                      const targets = isGrand ? MONTHS.map((_,i)=>SEGMENTS.reduce((s,sg)=>s+(SEG_TARGETS[sg][adj][i]||0),0)) : SEG_TARGETS[seg][adj];
-                      const totT = targets.reduce((s,v)=>s+v,0);
-                      const totA = isGrand ? SEGMENTS.reduce((s,sg)=>s+MONTHS.reduce((ss,m)=>ss+(segActuals[sg][adj][m]||0),0),0) : MONTHS.reduce((s,m)=>s+(segActuals[seg]?.[adj]?.[m]||0),0);
-                      const ytdT = MONTHS.slice(0,mi+1).reduce((s,m,i)=>s+(targets[i]||0),0);
-                      const ytdA = isGrand ? SEGMENTS.reduce((s,sg)=>s+MONTHS.slice(0,mi+1).reduce((ss,m)=>ss+(segActuals[sg][adj][m]||0),0),0) : MONTHS.slice(0,mi+1).reduce((s,m)=>s+(segActuals[seg]?.[adj]?.[m]||0),0);
-                      const ap = pct(ytdA,ytdT);
-                      const bg = isGrand?"#f0f4ff":si%2===0?"#f8fafc":"#fff";
-                      const color = isGrand?"#1e3a8a":"#374151";
-                      const segLabel = isGrand?"Sales (Total)":(SEG_LABELS[seg]||seg);
+                    {SEGS.concat(["Sales"]).map(function(seg,si){
+                      var isGrand=seg==="Sales";
+                      var targets=isGrand?MONTHS.map(function(_,i){return SEGS.reduce(function(s,sg){return s+(SEGTGT[sg][adj][i]||0);},0);}):SEGTGT[seg][adj];
+                      var totT=targets.reduce(function(s,v){return s+v;},0);
+                      var totA=isGrand?SEGS.reduce(function(s,sg){return s+MONTHS.reduce(function(ss,m){return ss+(segA[sg]?segA[sg][adj][m]||0:0);},0);},0):MONTHS.reduce(function(s,m){return s+(segA[seg]?segA[seg][adj][m]||0:0);},0);
+                      var ytdT2=MONTHS.slice(0,mi+1).reduce(function(s,m,i){return s+(targets[i]||0);},0);
+                      var ytdA2=isGrand?SEGS.reduce(function(s,sg){return s+MONTHS.slice(0,mi+1).reduce(function(ss,m){return ss+(segA[sg]?segA[sg][adj][m]||0:0);},0);},0):MONTHS.slice(0,mi+1).reduce(function(s,m){return s+(segA[seg]?segA[seg][adj][m]||0:0);},0);
+                      var ap=pct(ytdA2,ytdT2);
+                      var bg=isGrand?"#f0f4ff":si%2===0?"#f8fafc":"#fff";
+                      var segLabel=isGrand?"Sales (Total)":(SEGLABEL[seg]||seg);
                       return [
                         <tr key={seg+"T"} style={{background:bg}}>
-                          <td style={{padding:"5px 12px",fontWeight:isGrand?700:600,color,borderTop:"2px solid #e2e8f0"}} rowSpan={3}>{segLabel}</td>
+                          <td style={{padding:"5px 12px",fontWeight:isGrand?700:600,color:isGrand?"#1e3a8a":"#374151",borderTop:"2px solid #e2e8f0"}} rowSpan={3}>{segLabel}</td>
                           <td style={{padding:"5px 5px",color:"#94a3b8",fontSize:11,borderTop:"2px solid #e2e8f0"}}>Target</td>
-                          {MONTHS.map((m,i)=><td key={m} style={{padding:"5px 5px",textAlign:"right",borderTop:"2px solid #e2e8f0"}}>{fmt(targets[i]||0)}</td>)}
+                          {MONTHS.map(function(m,i){return <td key={m} style={{padding:"5px 5px",textAlign:"right",borderTop:"2px solid #e2e8f0"}}>{fmt(targets[i]||0)}</td>;})}
                           <td style={{padding:"5px 8px",textAlign:"right",fontWeight:600,borderTop:"2px solid #e2e8f0"}}>{fmt(totT)}</td>
-                          <td style={{padding:"5px 8px",textAlign:"right",fontWeight:600,borderTop:"2px solid #e2e8f0"}}>{fmt(ytdT)}</td>
-                          <td rowSpan={3} style={{padding:"5px 8px",textAlign:"center",fontWeight:700,fontSize:13,borderTop:"2px solid #e2e8f0",color:aC(ap),background:aBg(ap)}}>{ap.toFixed(1)}%</td>
+                          <td style={{padding:"5px 8px",textAlign:"right",fontWeight:600,borderTop:"2px solid #e2e8f0"}}>{fmt(ytdT2)}</td>
+                          <td rowSpan={3} style={{padding:"5px 8px",textAlign:"center",fontWeight:700,fontSize:13,borderTop:"2px solid #e2e8f0",color:aC(ap),background:aBg(ap)}}>{ap.toFixed(1)+"%"}</td>
                         </tr>,
                         <tr key={seg+"A"} style={{background:isGrand?"#e8eeff":si%2===0?"#eff6ff":"#f0f9ff"}}>
                           <td style={{padding:"5px 5px",color:"#2563eb",fontSize:11,fontWeight:600}}>Actual</td>
-                          {MONTHS.map((m)=>{
-                            if (isGrand) return <td key={m} style={{padding:"5px 5px",textAlign:"right",color:"#2563eb",fontWeight:600}}>{fmt(SEGMENTS.reduce((s,sg)=>s+(segActuals[sg][adj][m]||0),0))}</td>;
-                            const cid="seg-"+seg+"-"+adj+"-"+m;
-                            const val=segActuals[seg]?.[adj]?.[m]||0;
+                          {MONTHS.map(function(m){
+                            if(isGrand)return <td key={m} style={{padding:"5px 5px",textAlign:"right",color:"#2563eb",fontWeight:600}}>{fmt(SEGS.reduce(function(s,sg){return s+(segA[sg]?segA[sg][adj][m]||0:0);},0))}</td>;
+                            var cid="seg-"+seg+"-"+adj+"-"+m;
+                            var val=segA[seg]?segA[seg][adj][m]||0:0;
                             return <td key={m} style={{padding:"2px 3px",textAlign:"right"}}>
                               {editId===cid?
                                 <input autoFocus type="number" defaultValue={val}
-                                  onBlur={e=>{const nsa=Object.assign({},segActuals);nsa[seg]=Object.assign({},nsa[seg]);nsa[seg][adj]=Object.assign({},nsa[seg][adj]);nsa[seg][adj][m]=Number(e.target.value)||0;setSegActuals(nsa);save({segActuals:nsa});setEditId(null);}}
-                                  onKeyDown={e=>{if(e.key==="Enter"){const nsa=Object.assign({},segActuals);nsa[seg]=Object.assign({},nsa[seg]);nsa[seg][adj]=Object.assign({},nsa[seg][adj]);nsa[seg][adj][m]=Number(e.target.value)||0;setSegActuals(nsa);save({segActuals:nsa});setEditId(null);}}}
+                                  onBlur={function(e){setSegActual(seg,adj,m,e.target.value);setEditId(null);}}
+                                  onKeyDown={function(e){if(e.key==="Enter"){setSegActual(seg,adj,m,e.target.value);setEditId(null);}}}
                                   style={{width:65,padding:"2px 3px",fontSize:11,border:"2px solid #2563eb",borderRadius:3,textAlign:"right"}}/>
-                              :<span onClick={()=>setEditId(cid)} style={{cursor:"pointer",display:"block",padding:"3px 5px",borderRadius:3,fontSize:12,color:val>0?"#1d4ed8":"#94a3b8",background:val>0?"#dbeafe":"transparent"}}>{fmt(val)}</span>}
+                                :<span onClick={function(){setEditId(cid);}} style={{cursor:"pointer",display:"block",padding:"3px 5px",borderRadius:3,fontSize:12,color:val>0?"#1d4ed8":"#94a3b8",background:val>0?"#dbeafe":"transparent"}}>{fmt(val)}</span>}
                             </td>;
                           })}
                           <td style={{padding:"5px 8px",textAlign:"right",fontWeight:600,color:"#1d4ed8"}}>{fmt(totA)}</td>
-                          <td style={{padding:"5px 8px",textAlign:"right",fontWeight:600,color:"#1d4ed8"}}>{fmt(ytdA)}</td>
+                          <td style={{padding:"5px 8px",textAlign:"right",fontWeight:600,color:"#1d4ed8"}}>{fmt(ytdA2)}</td>
                         </tr>,
                         <tr key={seg+"P"} style={{background:bg}}>
                           <td style={{padding:"3px 5px",color:"#94a3b8",fontSize:11}}>Ach%</td>
-                          {MONTHS.map((m,i)=>{
-                            const T=targets[i]||0;
-                            const A=isGrand?SEGMENTS.reduce((s,sg)=>s+(segActuals[sg][adj][m]||0),0):segActuals[seg]?.[adj]?.[m]||0;
-                            const p=pct(A,T);
+                          {MONTHS.map(function(m,i){
+                            var T=targets[i]||0;
+                            var A=isGrand?SEGS.reduce(function(s,sg){return s+(segA[sg]?segA[sg][adj][m]||0:0);},0):(segA[seg]?segA[seg][adj][m]||0:0);
+                            var p=pct(A,T);
                             return <td key={m} style={{padding:"3px 5px",textAlign:"right",fontSize:11,fontWeight:600,color:T>0?aC(p):"#94a3b8"}}>{T>0?p.toFixed(1)+"%":"—"}</td>;
                           })}
-                          <td style={{padding:"3px 8px",textAlign:"right",fontSize:11,fontWeight:600,color:aC(pct(totA,totT))}}>{pct(totA,totT).toFixed(1)}%</td>
-                          <td style={{padding:"3px 8px",textAlign:"right",fontSize:11,fontWeight:600,color:aC(ap)}}>{ap.toFixed(1)}%</td>
+                          <td style={{padding:"3px 8px",textAlign:"right",fontSize:11,fontWeight:600,color:aC(pct(totA,totT))}}>{pct(totA,totT).toFixed(1)+"%"}</td>
+                          <td style={{padding:"3px 8px",textAlign:"right",fontSize:11,fontWeight:600,color:aC(ap)}}>{ap.toFixed(1)+"%"}</td>
                         </tr>
                       ];
                     })}
@@ -398,13 +420,13 @@ function App() {
             <div style={{background:"#fff",borderRadius:12,padding:24,width:320,boxShadow:"0 8px 32px rgba(0,0,0,.2)"}}>
               <div style={{fontWeight:700,fontSize:15,marginBottom:16,color:"#1e3a8a"}}>➕ Add New Rep</div>
               <label style={{fontSize:12,color:"#64748b",display:"block",marginBottom:4}}>Full Name</label>
-              <input value={newRep.name} onChange={e=>setNewRep(p=>({...p,name:e.target.value}))} placeholder="e.g. Juan dela Cruz" style={{width:"100%",padding:"7px 10px",borderRadius:6,border:"1px solid #cbd5e1",fontSize:13,marginBottom:12,boxSizing:"border-box"}}/>
+              <input value={newRep.name} onChange={function(e){setNewRep(function(p){return Object.assign({},p,{name:e.target.value});});}} placeholder="e.g. Juan dela Cruz" style={{width:"100%",padding:"7px 10px",borderRadius:6,border:"1px solid #cbd5e1",fontSize:13,marginBottom:12,boxSizing:"border-box"}}/>
               <label style={{fontSize:12,color:"#64748b",display:"block",marginBottom:4}}>Team</label>
-              <select value={newRep.team} onChange={e=>setNewRep(p=>({...p,team:e.target.value}))} style={{width:"100%",padding:"7px 10px",borderRadius:6,border:"1px solid #cbd5e1",fontSize:13,marginBottom:12,boxSizing:"border-box"}}>{TEAMS.map(t=><option key={t}>{t}</option>)}</select>
+              <select value={newRep.team} onChange={function(e){setNewRep(function(p){return Object.assign({},p,{team:e.target.value});});}} style={{width:"100%",padding:"7px 10px",borderRadius:6,border:"1px solid #cbd5e1",fontSize:13,marginBottom:12,boxSizing:"border-box"}}>{TEAMS.map(function(t){return <option key={t}>{t}</option>;})}</select>
               <label style={{fontSize:12,color:"#64748b",display:"block",marginBottom:4}}>Status</label>
-              <select value={newRep.status} onChange={e=>setNewRep(p=>({...p,status:e.target.value}))} style={{width:"100%",padding:"7px 10px",borderRadius:6,border:"1px solid #cbd5e1",fontSize:13,marginBottom:20,boxSizing:"border-box"}}><option value="">Active</option><option value="resigned">Resigned</option><option value="maternity">Maternity Leave</option><option value="tbh">TBH</option></select>
+              <select value={newRep.status} onChange={function(e){setNewRep(function(p){return Object.assign({},p,{status:e.target.value});});}} style={{width:"100%",padding:"7px 10px",borderRadius:6,border:"1px solid #cbd5e1",fontSize:13,marginBottom:20,boxSizing:"border-box"}}><option value="">Active</option><option value="resigned">Resigned</option><option value="maternity">Maternity Leave</option><option value="tbh">TBH</option></select>
               <div style={{display:"flex",gap:8,justifyContent:"flex-end"}}>
-                <button onClick={()=>setShowAdd(false)} style={{padding:"7px 16px",borderRadius:6,border:"1px solid #cbd5e1",background:"#fff",cursor:"pointer",fontSize:13}}>Cancel</button>
+                <button onClick={function(){setShowAdd(false);}} style={{padding:"7px 16px",borderRadius:6,border:"1px solid #cbd5e1",background:"#fff",cursor:"pointer",fontSize:13}}>Cancel</button>
                 <button onClick={addRep} style={{padding:"7px 16px",borderRadius:6,border:"none",background:"#2563eb",color:"#fff",cursor:"pointer",fontSize:13,fontWeight:600}}>Add Rep</button>
               </div>
             </div>
@@ -412,28 +434,28 @@ function App() {
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10,flexWrap:"wrap",gap:8}}>
             <b style={{color:"#1e3a8a",fontSize:14}}>📋 Rep Summary — {curMon}</b>
             <div style={{display:"flex",gap:10,alignItems:"center",flexWrap:"wrap"}}>
-              <div style={{display:"flex",gap:8,fontSize:11}}>{[["#dc2626","<60%"],["#ea580c","60–79%"],["#2563eb","80–99%"],["#16a34a","≥100%"]].map(([c,l])=><span key={l} style={{display:"flex",alignItems:"center",gap:3}}><span style={{width:8,height:8,borderRadius:"50%",background:c,display:"inline-block"}}/><span style={{color:"#64748b"}}>{l}</span></span>)}</div>
-              <label style={{display:"flex",alignItems:"center",gap:5,fontSize:12,color:"#64748b",cursor:"pointer"}}><input type="checkbox" checked={showInactive} onChange={e=>setShowInactive(e.target.checked)}/> Show inactive</label>
-              <button onClick={()=>setShowAdd(true)} style={{padding:"5px 12px",background:"#2563eb",color:"#fff",border:"none",borderRadius:6,fontSize:12,fontWeight:600,cursor:"pointer"}}>+ Add Rep</button>
+              <div style={{display:"flex",gap:8,fontSize:11}}>{[["#dc2626","<60%"],["#ea580c","60–79%"],["#2563eb","80–99%"],["#16a34a","≥100%"]].map(function(x){return <span key={x[1]} style={{display:"flex",alignItems:"center",gap:3}}><span style={{width:8,height:8,borderRadius:"50%",background:x[0],display:"inline-block"}}/><span style={{color:"#64748b"}}>{x[1]}</span></span>;})}</div>
+              <label style={{display:"flex",alignItems:"center",gap:5,fontSize:12,color:"#64748b",cursor:"pointer"}}><input type="checkbox" checked={showInactive} onChange={function(e){setShowInactive(e.target.checked);}}/> Show inactive</label>
+              <button onClick={function(){setShowAdd(true);}} style={{padding:"5px 12px",background:"#2563eb",color:"#fff",border:"none",borderRadius:6,fontSize:12,fontWeight:600,cursor:"pointer"}}>+ Add Rep</button>
             </div>
           </div>
           <div style={{overflowX:"auto"}}>
             <table style={{borderCollapse:"collapse",width:"100%",background:"#fff",borderRadius:8,boxShadow:"0 1px 3px rgba(0,0,0,.08)",fontSize:12}}>
               <thead>
                 <tr style={{background:"#1e3a8a",color:"#fff"}}>
-                  <th style={thS({textAlign:"left",minWidth:150,position:"sticky",left:0})}>Rep</th>
-                  <th style={thS({textAlign:"left",minWidth:115})}>Team</th>
-                  <th style={thS({textAlign:"right",minWidth:90})}>YTD Quota</th>
-                  <th onClick={()=>togSort("won")} style={thS({textAlign:"right",minWidth:90,cursor:"pointer",background:sortCol==="won"?"#1e40af":"#1e3a8a"})}>YTD Won {sortCol==="won"?(sortDir==="desc"?"▼":"▲"):"▾"}</th>
-                  <th onClick={()=>togSort("att")} style={thS({textAlign:"center",minWidth:85,cursor:"pointer",background:sortCol==="att"?"#1e40af":"#1e3a8a"})}>YTD Att% {sortCol==="att"?(sortDir==="desc"?"▼":"▲"):"▾"}</th>
-                  <th style={thS({textAlign:"right",minWidth:88})}>To Go</th>
-                  <th style={thS({textAlign:"right",minWidth:105})}>{curMon} Forecast</th>
-                  <th style={thS({textAlign:"right",minWidth:88})}>{curMon} Actual</th>
-                  <th style={thS({textAlign:"right",minWidth:90})}>Fcst To Go</th>
-                  <th style={thS({textAlign:"center",minWidth:78})}>Fcst Acc%</th>
-                  <th style={thS({textAlign:"center",minWidth:58})}>E/F MRR</th>
-                  <th style={thS({textAlign:"center",minWidth:75})}>New Logos</th>
-                  <th style={thS({textAlign:"center",minWidth:58})}>M/Q MRR</th>
+                  <th style={ths({textAlign:"left",minWidth:150,position:"sticky",left:0})}>Rep</th>
+                  <th style={ths({textAlign:"left",minWidth:115})}>Team</th>
+                  <th style={ths({textAlign:"right",minWidth:90})}>YTD Quota</th>
+                  <th onClick={function(){togSort("won");}} style={ths({textAlign:"right",minWidth:90,cursor:"pointer",background:sortCol==="won"?"#1e40af":"#1e3a8a"})}>YTD Won {sortCol==="won"?(sortDir==="desc"?"▼":"▲"):"▾"}</th>
+                  <th onClick={function(){togSort("att");}} style={ths({textAlign:"center",minWidth:85,cursor:"pointer",background:sortCol==="att"?"#1e40af":"#1e3a8a"})}>YTD Att% {sortCol==="att"?(sortDir==="desc"?"▼":"▲"):"▾"}</th>
+                  <th style={ths({textAlign:"right",minWidth:88})}>To Go</th>
+                  <th style={ths({textAlign:"right",minWidth:105})}>{curMon} Forecast</th>
+                  <th style={ths({textAlign:"right",minWidth:88})}>{curMon} Actual</th>
+                  <th style={ths({textAlign:"right",minWidth:90})}>Fcst To Go</th>
+                  <th style={ths({textAlign:"center",minWidth:78})}>Fcst Acc%</th>
+                  <th style={ths({textAlign:"center",minWidth:58})}>E/F MRR</th>
+                  <th style={ths({textAlign:"center",minWidth:75})}>New Logos</th>
+                  <th style={ths({textAlign:"center",minWidth:58})}>M/Q MRR</th>
                 </tr>
                 <tr style={{background:"#1e40af",color:"#fff",fontWeight:700}}>
                   <td style={{padding:"6px 12px",position:"sticky",left:0,background:"#1e40af"}}>TOTAL</td><td/>
@@ -444,28 +466,28 @@ function App() {
                   <td style={{padding:"6px 8px",textAlign:"right"}}>{fmtK(totFc)}</td>
                   <td style={{padding:"6px 8px",textAlign:"right"}}>{fmtK(totMonA)}</td>
                   <td style={{padding:"6px 8px",textAlign:"right",color:totMonA>=totFc?"#86efac":"#fca5a5"}}>{fmt(totMonA-totFc)}</td>
-                  <td style={{padding:"6px 8px",textAlign:"center"}}>{totFc>0?`${pct(totMonA,totFc).toFixed(0)}%`:"—"}</td>
+                  <td style={{padding:"6px 8px",textAlign:"center"}}>{totFc>0?pct(totMonA,totFc).toFixed(0)+"%":"—"}</td>
                   <td/><td style={{padding:"6px 8px",textAlign:"center"}}>{totNL}</td><td/>
                 </tr>
               </thead>
               <tbody>
-                {sortedReps.map((r,i)=>{
-                  const yA=ytdA(r.n),yT=ytdT(r.n),yP=pct(yA,yT),togo=yA-yT,fc=meta[r.n]?.fc||0,mA=monA(r.n),fToGo=mA-fc,fAcc=fc>0?pct(mA,fc):null;
-                  const off=!!r.s,bg=off?"#fff8f0":i%2===0?"#f8fafc":"#fff";
-                  return <tr key={r.n} style={{background:bg,borderBottom:"1px solid #e2e8f0",opacity:off?.65:1}}>
+                {sortedReps.map(function(r,i){
+                  var yA=ytdA(r.n),yT=ytdT(r.n),yP=pct(yA,yT),togo=yA-yT,fc=meta[r.n]?meta[r.n].fc:0,mA=monA(r.n),fToGo=mA-fc,fAcc=fc>0?pct(mA,fc):null;
+                  var off=!!r.s,bg=off?"#fff8f0":i%2===0?"#f8fafc":"#fff";
+                  return <tr key={r.n} style={{background:bg,borderBottom:"1px solid #e2e8f0",opacity:off?0.65:1}}>
                     <td style={{padding:"7px 12px",fontWeight:600,position:"sticky",left:0,background:bg}}><div style={{display:"flex",alignItems:"center",gap:5,flexWrap:"wrap"}}>{r.n}<Badge s={r.s}/></div></td>
-                    <td style={{padding:"7px 8px"}}><span style={{background:(TEAM_COLOR[r.t]||"#1e3a8a")+"18",color:TEAM_COLOR[r.t]||"#1e3a8a",padding:"2px 7px",borderRadius:20,fontSize:11,fontWeight:600}}>{r.t}</span></td>
+                    <td style={{padding:"7px 8px"}}><span style={{background:(TCOL[r.t]||"#1e3a8a")+"18",color:TCOL[r.t]||"#1e3a8a",padding:"2px 7px",borderRadius:20,fontSize:11,fontWeight:600}}>{r.t}</span></td>
                     <td style={{padding:"7px 8px",textAlign:"right"}}>{fmt(yT)}</td>
                     <td style={{padding:"7px 8px",textAlign:"right",color:"#2563eb",fontWeight:600}}>{fmt(yA)}</td>
                     <td style={{padding:"7px 8px",textAlign:"center"}}><Chip p={yP}/></td>
-                    <td style={{padding:"7px 8px",textAlign:"right",fontWeight:600,color:togo>=0?"#16a34a":"#dc2626"}}>{togo>=0?"+":""}{fmt(togo)}</td>
-                    <td style={{padding:"4px 6px",textAlign:"right"}}>{editId===`fc-${r.n}`?<input autoFocus type="number" defaultValue={fc} onBlur={e=>{setMetaF(r.n,"fc",Number(e.target.value)||0);setEditId(null);}} onKeyDown={e=>{if(e.key==="Enter"){setMetaF(r.n,"fc",Number(e.target.value)||0);setEditId(null);}}} style={{width:70,padding:"2px 4px",fontSize:12,border:"2px solid #2563eb",borderRadius:4,textAlign:"right"}}/>:<span onClick={()=>setEditId(`fc-${r.n}`)} style={{cursor:"pointer",display:"block",padding:"2px 6px",borderRadius:4,color:fc>0?"#1d4ed8":"#94a3b8",background:fc>0?"#dbeafe":"transparent"}}>{fmt(fc)}</span>}</td>
+                    <td style={{padding:"7px 8px",textAlign:"right",fontWeight:600,color:togo>=0?"#16a34a":"#dc2626"}}>{(togo>=0?"+":"")+fmt(togo)}</td>
+                    <td style={{padding:"4px 6px",textAlign:"right"}}>{editId==="fc-"+r.n?<input autoFocus type="number" defaultValue={fc} onBlur={function(e){setMetaF(r.n,"fc",Number(e.target.value)||0);setEditId(null);}} onKeyDown={function(e){if(e.key==="Enter"){setMetaF(r.n,"fc",Number(e.target.value)||0);setEditId(null);}}} style={{width:70,padding:"2px 4px",fontSize:12,border:"2px solid #2563eb",borderRadius:4,textAlign:"right"}}/>:<span onClick={function(){setEditId("fc-"+r.n);}} style={{cursor:"pointer",display:"block",padding:"2px 6px",borderRadius:4,color:fc>0?"#1d4ed8":"#94a3b8",background:fc>0?"#dbeafe":"transparent"}}>{fmt(fc)}</span>}</td>
                     <td style={{padding:"7px 8px",textAlign:"right",color:"#2563eb",fontWeight:600}}>{fmt(mA)}</td>
-                    <td style={{padding:"7px 8px",textAlign:"right",fontWeight:600,color:fToGo>=0?"#16a34a":"#dc2626"}}>{fToGo>=0?"+":""}{fmt(fToGo)}</td>
+                    <td style={{padding:"7px 8px",textAlign:"right",fontWeight:600,color:fToGo>=0?"#16a34a":"#dc2626"}}>{(fToGo>=0?"+":"")+fmt(fToGo)}</td>
                     <td style={{padding:"7px 8px",textAlign:"center"}}>{fAcc!==null?<Chip p={fAcc}/>:"—"}</td>
-                    <td style={{padding:"7px 8px",textAlign:"center"}}><input type="checkbox" checked={meta[r.n]?.ef||false} onChange={e=>setMetaF(r.n,"ef",e.target.checked)} style={{width:15,height:15,cursor:"pointer",accentColor:"#16a34a"}}/></td>
-                    <td style={{padding:"4px 6px",textAlign:"center"}}><input type="number" min="0" value={meta[r.n]?.nl||0} onChange={e=>setMetaF(r.n,"nl",Number(e.target.value)||0)} style={{width:42,padding:"2px 4px",fontSize:12,border:"1px solid #cbd5e1",borderRadius:4,textAlign:"center"}}/></td>
-                    <td style={{padding:"7px 8px",textAlign:"center"}}><input type="checkbox" checked={meta[r.n]?.mq||false} onChange={e=>setMetaF(r.n,"mq",e.target.checked)} style={{width:15,height:15,cursor:"pointer",accentColor:"#16a34a"}}/></td>
+                    <td style={{padding:"7px 8px",textAlign:"center"}}><input type="checkbox" checked={meta[r.n]?meta[r.n].ef:false} onChange={function(e){setMetaF(r.n,"ef",e.target.checked);}} style={{width:15,height:15,cursor:"pointer",accentColor:"#16a34a"}}/></td>
+                    <td style={{padding:"4px 6px",textAlign:"center"}}><input type="number" min="0" value={meta[r.n]?meta[r.n].nl:0} onChange={function(e){setMetaF(r.n,"nl",Number(e.target.value)||0);}} style={{width:42,padding:"2px 4px",fontSize:12,border:"1px solid #cbd5e1",borderRadius:4,textAlign:"center"}}/></td>
+                    <td style={{padding:"7px 8px",textAlign:"center"}}><input type="checkbox" checked={meta[r.n]?meta[r.n].mq:false} onChange={function(e){setMetaF(r.n,"mq",e.target.checked);}} style={{width:15,height:15,cursor:"pointer",accentColor:"#16a34a"}}/></td>
                   </tr>;
                 })}
               </tbody>
@@ -475,38 +497,50 @@ function App() {
 
         {tab===2&&<div>
           <div style={{display:"flex",gap:10,marginBottom:14,flexWrap:"wrap",alignItems:"center"}}>
-            <select value={selTeam} onChange={e=>setSelTeam(e.target.value)} style={{padding:"6px 10px",borderRadius:6,border:"1px solid #cbd5e1",fontSize:13}}>{TEAMS.map(t=><option key={t}>{t}</option>)}</select>
-            <select value={selAdj} onChange={e=>setSelAdj(e.target.value)} style={{padding:"6px 10px",borderRadius:6,border:"1px solid #cbd5e1",fontSize:13}}>{ADJ.map(a=><option key={a}>{a}</option>)}</select>
+            <select value={selTeam} onChange={function(e){setSelTeam(e.target.value);}} style={{padding:"6px 10px",borderRadius:6,border:"1px solid #cbd5e1",fontSize:13}}>{TEAMS.map(function(t){return <option key={t}>{t}</option>;})}</select>
+            <select value={selAdj} onChange={function(e){setSelAdj(e.target.value);}} style={{padding:"6px 10px",borderRadius:6,border:"1px solid #cbd5e1",fontSize:13}}>{ADJ.map(function(a){return <option key={a}>{a}</option>;})}</select>
             <span style={{fontSize:12,color:"#94a3b8"}}>Click Actual to edit</span>
           </div>
           <div style={{overflowX:"auto"}}>
             <table style={{borderCollapse:"collapse",width:"100%",background:"#fff",borderRadius:8,boxShadow:"0 1px 3px rgba(0,0,0,.08)"}}>
-              <thead><tr style={{background:TEAM_COLOR[selTeam]||"#1e3a8a",color:"#fff"}}>
+              <thead><tr style={{background:TCOL[selTeam]||"#1e3a8a",color:"#fff"}}>
                 <th style={{padding:"8px 12px",textAlign:"left",minWidth:155}}>Rep</th>
                 <th style={{padding:"8px 6px",textAlign:"center",width:48}}>Row</th>
-                {MONTHS.map(m=><th key={m} style={{padding:"8px 5px",textAlign:"right",minWidth:68}}>{m}</th>)}
+                {MONTHS.map(function(m){return <th key={m} style={{padding:"8px 5px",textAlign:"right",minWidth:68}}>{m}</th>;})}
                 <th style={{padding:"8px 8px",textAlign:"right",minWidth:88}}>Total</th>
                 <th style={{padding:"8px 8px",textAlign:"center",minWidth:65}}>Ach%</th>
               </tr></thead>
-              <tbody>{reps.filter(r=>r.t===selTeam).map((r,ri)=>{
-                const off=!!r.s,totT=MONTHS.reduce((s,m)=>s+(data[r.n]?.[selAdj]?.[m]?.T||0),0),totA=MONTHS.reduce((s,m)=>s+(data[r.n]?.[selAdj]?.[m]?.A||0),0),ap=pct(totA,totT),bg=off?"#fff8f0":ri%2===0?"#f8fafc":"#fff";
+              <tbody>{reps.filter(function(r){return r.t===selTeam;}).map(function(r,ri){
+                var off=!!r.s;
+                var totT=MONTHS.reduce(function(s,m){return s+(data[r.n]&&data[r.n][selAdj]&&data[r.n][selAdj][m]?data[r.n][selAdj][m].T:0);},0);
+                var totA=MONTHS.reduce(function(s,m){return s+(data[r.n]&&data[r.n][selAdj]&&data[r.n][selAdj][m]?data[r.n][selAdj][m].A:0);},0);
+                var ap=pct(totA,totT),bg=off?"#fff8f0":ri%2===0?"#f8fafc":"#fff";
                 return [
-                  <tr key={r.n+"T"} style={{background:bg,opacity:off?.7:1}}>
+                  <tr key={r.n+"T"} style={{background:bg,opacity:off?0.7:1}}>
                     <td style={{padding:"5px 12px",fontWeight:600,borderTop:"2px solid #e2e8f0"}} rowSpan={3}><div style={{display:"flex",alignItems:"center",gap:5}}>{r.n}<Badge s={r.s}/></div></td>
                     <td style={{padding:"5px 5px",color:"#94a3b8",fontSize:11,borderTop:"2px solid #e2e8f0"}}>Target</td>
-                    {MONTHS.map(m=><td key={m} style={{padding:"5px 5px",textAlign:"right",borderTop:"2px solid #e2e8f0",fontSize:12}}>{fmt(data[r.n]?.[selAdj]?.[m]?.T||0)}</td>)}
+                    {MONTHS.map(function(m){return <td key={m} style={{padding:"5px 5px",textAlign:"right",borderTop:"2px solid #e2e8f0",fontSize:12}}>{fmt(data[r.n]&&data[r.n][selAdj]&&data[r.n][selAdj][m]?data[r.n][selAdj][m].T:0)}</td>;})}
                     <td style={{padding:"5px 8px",textAlign:"right",fontWeight:600,borderTop:"2px solid #e2e8f0"}}>{fmt(totT)}</td>
-                    <td rowSpan={3} style={{padding:"5px 8px",textAlign:"center",fontWeight:700,fontSize:13,borderTop:"2px solid #e2e8f0",color:aC(ap),background:aBg(ap)}}>{ap.toFixed(1)}%</td>
+                    <td rowSpan={3} style={{padding:"5px 8px",textAlign:"center",fontWeight:700,fontSize:13,borderTop:"2px solid #e2e8f0",color:aC(ap),background:aBg(ap)}}>{ap.toFixed(1)+"%"}</td>
                   </tr>,
-                  <tr key={r.n+"A"} style={{background:off?"#fff3e0":ri%2===0?"#eff6ff":"#f0f9ff",opacity:off?.7:1}}>
+                  <tr key={r.n+"A"} style={{background:off?"#fff3e0":ri%2===0?"#eff6ff":"#f0f9ff",opacity:off?0.7:1}}>
                     <td style={{padding:"5px 5px",color:"#2563eb",fontSize:11,fontWeight:600}}>Actual</td>
-                    {MONTHS.map(m=>{const cid=`${r.n}-${selAdj}-${m}`,val=data[r.n]?.[selAdj]?.[m]?.A||0;return <td key={m} style={{padding:"2px 3px",textAlign:"right"}}>{editId===cid?<input autoFocus type="number" defaultValue={val} onBlur={e=>{setActual(r.n,selAdj,m,e.target.value);setEditId(null);}} onKeyDown={e=>{if(e.key==="Enter"){setActual(r.n,selAdj,m,e.target.value);setEditId(null);}}} style={{width:60,padding:"2px 3px",fontSize:11,border:"2px solid #2563eb",borderRadius:3,textAlign:"right"}}/>:<span onClick={()=>setEditId(cid)} style={{cursor:"pointer",display:"block",padding:"3px 5px",borderRadius:3,fontSize:12,color:val>0?"#1d4ed8":"#94a3b8",background:val>0?"#dbeafe":"transparent"}}>{fmt(val)}</span>}</td>;})}
+                    {MONTHS.map(function(m){
+                      var cid=r.n+"-"+selAdj+"-"+m;
+                      var val=data[r.n]&&data[r.n][selAdj]&&data[r.n][selAdj][m]?data[r.n][selAdj][m].A:0;
+                      return <td key={m} style={{padding:"2px 3px",textAlign:"right"}}>{editId===cid?<input autoFocus type="number" defaultValue={val} onBlur={function(e){setActual(r.n,selAdj,m,e.target.value);setEditId(null);}} onKeyDown={function(e){if(e.key==="Enter"){setActual(r.n,selAdj,m,e.target.value);setEditId(null);}}} style={{width:60,padding:"2px 3px",fontSize:11,border:"2px solid #2563eb",borderRadius:3,textAlign:"right"}}/>:<span onClick={function(){setEditId(cid);}} style={{cursor:"pointer",display:"block",padding:"3px 5px",borderRadius:3,fontSize:12,color:val>0?"#1d4ed8":"#94a3b8",background:val>0?"#dbeafe":"transparent"}}>{fmt(val)}</span>}</td>;
+                    })}
                     <td style={{padding:"5px 8px",textAlign:"right",fontWeight:600,color:"#1d4ed8"}}>{fmt(totA)}</td>
                   </tr>,
-                  <tr key={r.n+"P"} style={{background:bg,opacity:off?.7:1}}>
+                  <tr key={r.n+"P"} style={{background:bg,opacity:off?0.7:1}}>
                     <td style={{padding:"3px 5px",color:"#94a3b8",fontSize:11}}>Ach%</td>
-                    {MONTHS.map(m=>{const T=data[r.n]?.[selAdj]?.[m]?.T||0,A=data[r.n]?.[selAdj]?.[m]?.A||0,p=pct(A,T);return <td key={m} style={{padding:"3px 5px",textAlign:"right",fontSize:11,fontWeight:600,color:T>0?aC(p):"#94a3b8"}}>{T>0?`${p.toFixed(1)}%`:"—"}</td>;})}
-                    <td style={{padding:"3px 8px",textAlign:"right",fontSize:11,fontWeight:600,color:aC(ap)}}>{ap.toFixed(1)}%</td>
+                    {MONTHS.map(function(m){
+                      var T=data[r.n]&&data[r.n][selAdj]&&data[r.n][selAdj][m]?data[r.n][selAdj][m].T:0;
+                      var A=data[r.n]&&data[r.n][selAdj]&&data[r.n][selAdj][m]?data[r.n][selAdj][m].A:0;
+                      var p=pct(A,T);
+                      return <td key={m} style={{padding:"3px 5px",textAlign:"right",fontSize:11,fontWeight:600,color:T>0?aC(p):"#94a3b8"}}>{T>0?p.toFixed(1)+"%":"—"}</td>;
+                    })}
+                    <td style={{padding:"3px 8px",textAlign:"right",fontSize:11,fontWeight:600,color:aC(ap)}}>{ap.toFixed(1)+"%"}</td>
                   </tr>
                 ];
               })}</tbody>
@@ -517,7 +551,7 @@ function App() {
         {tab===3&&<div>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
             <b style={{color:"#1e3a8a",fontSize:15}}>🏆 Leaderboard — ranked by YTD Att%</b>
-            <label style={{display:"flex",alignItems:"center",gap:5,fontSize:12,color:"#64748b",cursor:"pointer"}}><input type="checkbox" checked={showInactive} onChange={e=>setShowInactive(e.target.checked)}/> Show inactive</label>
+            <label style={{display:"flex",alignItems:"center",gap:5,fontSize:12,color:"#64748b",cursor:"pointer"}}><input type="checkbox" checked={showInactive} onChange={function(e){setShowInactive(e.target.checked);}}/> Show inactive</label>
           </div>
           <div style={{overflowX:"auto"}}>
             <table style={{borderCollapse:"collapse",width:"100%",background:"#fff",borderRadius:8,boxShadow:"0 1px 3px rgba(0,0,0,.08)"}}>
@@ -530,46 +564,49 @@ function App() {
                 <th style={{padding:"8px 8px",textAlign:"right",minWidth:90}}>YTD Won</th>
                 <th style={{padding:"8px 8px",textAlign:"center",minWidth:80}}>YTD Att%</th>
               </tr></thead>
-              <tbody>{lbReps.map((r,i)=><tr key={r.n} style={{background:r.s?"#fff8f0":i===0?"#fefce8":i%2===0?"#f8fafc":"#fff",borderBottom:"1px solid #e2e8f0",opacity:r.s?.7:1}}>
+              <tbody>{lbReps.map(function(r,i){return <tr key={r.n} style={{background:r.s?"#fff8f0":i===0?"#fefce8":i%2===0?"#f8fafc":"#fff",borderBottom:"1px solid #e2e8f0",opacity:r.s?0.7:1}}>
                 <td style={{padding:"7px 8px",textAlign:"center",fontWeight:700,color:r.s?"#94a3b8":i===0?"#ca8a04":i===1?"#94a3b8":i===2?"#b45309":"#374151"}}>{r.s?"—":i===0?"🥇":i===1?"🥈":i===2?"🥉":i+1}</td>
                 <td style={{padding:"7px 10px"}}><div style={{display:"flex",alignItems:"center",gap:6}}><span style={{fontWeight:600}}>{r.n}</span><Badge s={r.s}/></div></td>
-                <td style={{padding:"7px 8px"}}><span style={{background:(TEAM_COLOR[r.t]||"#1e3a8a")+"18",color:TEAM_COLOR[r.t]||"#1e3a8a",padding:"2px 7px",borderRadius:20,fontSize:11,fontWeight:600}}>{r.t}</span></td>
-                <td style={{padding:"7px 8px",textAlign:"right",fontWeight:600,color:aC(r.MRR.p)}}>{r.MRR.p.toFixed(1)}%</td>
-                <td style={{padding:"7px 8px",textAlign:"right",fontWeight:600,color:aC(r["E/F"].p)}}>{r["E/F"].p.toFixed(1)}%</td>
+                <td style={{padding:"7px 8px"}}><span style={{background:(TCOL[r.t]||"#1e3a8a")+"18",color:TCOL[r.t]||"#1e3a8a",padding:"2px 7px",borderRadius:20,fontSize:11,fontWeight:600}}>{r.t}</span></td>
+                <td style={{padding:"7px 8px",textAlign:"right",fontWeight:600,color:aC(r.MRR.p)}}>{r.MRR.p.toFixed(1)+"%"}</td>
+                <td style={{padding:"7px 8px",textAlign:"right",fontWeight:600,color:aC(r["E/F"].p)}}>{r["E/F"].p.toFixed(1)+"%"}</td>
                 <td style={{padding:"7px 8px",textAlign:"right",fontWeight:600}}>{fmt(ytdA(r.n))}</td>
                 <td style={{padding:"7px 8px",textAlign:"center"}}><Chip p={r.ytdP}/></td>
-              </tr>)}</tbody>
+              </tr>;})}</tbody>
             </table>
           </div>
           <div style={{marginTop:8,fontSize:11,color:"#94a3b8"}}>🟢 ≥100% · 🔵 80–99% · 🟠 60–79% · 🔴 &lt;60%</div>
         </div>}
 
-        {tab===5&&<div>
+        {tab===4&&<div>
           <b style={{color:"#1e3a8a",fontSize:15,display:"block",marginBottom:14}}>👥 Team Dashboard</b>
           <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(300px,1fr))",gap:14}}>
-            {TEAMS.map(tm=>{
-              const tmReps=reps.filter(r=>r.t===tm);if(!tmReps.length)return null;
-              const sums=tmReps.map(r=>({...r,...summary(r.n)}));
-              const act=sums.filter(r=>!r.s),T=act.reduce((s,r)=>s+r.all.T,0),A=act.reduce((s,r)=>s+r.all.A,0),tp=pct(A,T);
-              const sorted2=[...act].sort((a,b)=>b.all.p-a.all.p),col=TEAM_COLOR[tm]||"#1e3a8a";
+            {TEAMS.map(function(tm){
+              var tmReps=reps.filter(function(r){return r.t===tm;});
+              if(!tmReps.length)return null;
+              var sums=tmReps.map(function(r){var s=summary(r.n);s.n=r.n;s.s=r.s;return s;});
+              var act=sums.filter(function(r){return !r.s;});
+              var T=act.reduce(function(s,r){return s+r.all.T;},0),A=act.reduce(function(s,r){return s+r.all.A;},0),tp=pct(A,T);
+              var sorted2=act.slice().sort(function(a,b){return b.all.p-a.all.p;});
+              var col=TCOL[tm]||"#1e3a8a";
               return <div key={tm} style={{background:"#fff",borderRadius:10,boxShadow:"0 1px 4px rgba(0,0,0,.1)",overflow:"hidden"}}>
                 <div style={{background:col,color:"#fff",padding:"10px 14px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                   <span style={{fontWeight:700}}>{tm}</span>
-                  <span style={{fontSize:11,opacity:.85}}>{act.length} active{tmReps.length>act.length?` · ${tmReps.length-act.length} inactive`:""}</span>
+                  <span style={{fontSize:11,opacity:.85}}>{act.length+" active"+(tmReps.length>act.length?" · "+(tmReps.length-act.length)+" inactive":"")}</span>
                 </div>
                 <div style={{padding:12}}>
                   <div style={{display:"flex",justifyContent:"space-between",marginBottom:10,background:"#f8fafc",borderRadius:7,padding:"7px 10px"}}>
                     <div style={{textAlign:"center"}}><div style={{fontSize:10,color:"#94a3b8",marginBottom:1}}>TARGET</div><div style={{fontWeight:700,fontSize:12}}>{fmtK(T)}</div></div>
                     <div style={{textAlign:"center"}}><div style={{fontSize:10,color:"#94a3b8",marginBottom:1}}>ACTUAL</div><div style={{fontWeight:700,fontSize:12,color:"#2563eb"}}>{fmtK(A)}</div></div>
-                    <div style={{textAlign:"center"}}><div style={{fontSize:10,color:"#94a3b8",marginBottom:1}}>ATTAINMENT</div><div style={{fontWeight:700,fontSize:15,color:aC(tp)}}>{tp.toFixed(1)}%</div></div>
+                    <div style={{textAlign:"center"}}><div style={{fontSize:10,color:"#94a3b8",marginBottom:1}}>ATTAINMENT</div><div style={{fontWeight:700,fontSize:15,color:aC(tp)}}>{tp.toFixed(1)+"%"}</div></div>
                   </div>
-                  {sums.map(r=><div key={r.n} style={{marginBottom:7,opacity:r.s?.45:1}}>
+                  {sums.map(function(r){return <div key={r.n} style={{marginBottom:7,opacity:r.s?0.45:1}}>
                     <div style={{display:"flex",justifyContent:"space-between",fontSize:12,marginBottom:2}}>
                       <span style={{fontWeight:500,display:"flex",alignItems:"center",gap:3}}>{r.n.split(" ")[0]}<Badge s={r.s}/></span>
-                      <span style={{fontWeight:700,color:r.s?"#94a3b8":aC(r.all.p)}}>{r.all.p.toFixed(1)}%</span>
+                      <span style={{fontWeight:700,color:r.s?"#94a3b8":aC(r.all.p)}}>{r.all.p.toFixed(1)+"%"}</span>
                     </div>
-                    <div style={{background:"#e2e8f0",borderRadius:3,height:6}}><div style={{width:`${Math.min(r.all.p,100)}%`,background:r.s?"#cbd5e1":aC(r.all.p),borderRadius:3,height:6}}/></div>
-                  </div>)}
+                    <div style={{background:"#e2e8f0",borderRadius:3,height:6}}><div style={{width:Math.min(r.all.p,100)+"%",background:r.s?"#cbd5e1":aC(r.all.p),borderRadius:3,height:6}}/></div>
+                  </div>;})}
                   {sorted2.length>1&&<div style={{marginTop:8,display:"flex",gap:6,fontSize:11}}>
                     <span style={{background:"#dcfce7",color:"#16a34a",padding:"2px 7px",borderRadius:20}}>🔝 {sorted2[0].n.split(" ")[0]}</span>
                     <span style={{background:"#fee2e2",color:"#dc2626",padding:"2px 7px",borderRadius:20}}>📉 {sorted2[sorted2.length-1].n.split(" ")[0]}</span>
@@ -580,7 +617,7 @@ function App() {
           </div>
         </div>}
 
-        {tab===4&&<div>
+        {tab===5&&<div>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12,flexWrap:"wrap",gap:8}}>
             <b style={{color:"#1e3a8a",fontSize:15}}>⚡ Accelerator — Monthly Hit Tracker</b>
             <div style={{display:"flex",gap:10,fontSize:11,color:"#64748b"}}>
@@ -592,17 +629,21 @@ function App() {
               <thead><tr style={{background:"#1e3a8a",color:"#fff"}}>
                 <th style={{padding:"8px 10px",textAlign:"left",minWidth:80}}>Segment</th>
                 <th style={{padding:"8px 12px",textAlign:"left",minWidth:150}}>Rep</th>
-                {MONTHS.map(m=><th key={m} style={{padding:"8px 6px",textAlign:"center",minWidth:58}}>{m}</th>)}
+                {MONTHS.map(function(m){return <th key={m} style={{padding:"8px 6px",textAlign:"center",minWidth:58}}>{m}</th>;})}
                 <th style={{padding:"8px 8px",textAlign:"center",minWidth:55}}>Total ✔</th>
               </tr></thead>
-              <tbody>{activeReps.map((r,i)=>{
-                const bg=i%2===0?"#f8fafc":"#fff",hits=MONTHS.filter(m=>accel[r.n]?.[m]===true).length;
+              <tbody>{activeReps.map(function(r,i){
+                var bg=i%2===0?"#f8fafc":"#fff";
+                var hits=MONTHS.filter(function(m){return accel[r.n]&&accel[r.n][m]===true;}).length;
                 return <tr key={r.n} style={{background:bg,borderBottom:"1px solid #e2e8f0"}}>
-                  <td style={{padding:"7px 10px",color:"#64748b",fontSize:11,fontWeight:600}}>{SEG_MAP[r.t]||r.t}</td>
+                  <td style={{padding:"7px 10px",color:"#64748b",fontSize:11,fontWeight:600}}>{SEGMAP[r.t]||r.t}</td>
                   <td style={{padding:"7px 12px",fontWeight:600}}>{r.n}</td>
-                  {MONTHS.map(m=>{const val=accel[r.n]?.[m];return <td key={m} style={{padding:"3px 3px",textAlign:"center"}}>
-                    <button onClick={()=>toggleAccel(r.n,m)} style={{width:30,height:28,borderRadius:5,border:"none",cursor:"pointer",fontSize:14,fontWeight:700,background:val===true?"#dcfce7":val===false?"#fee2e2":"#f1f5f9",color:val===true?"#16a34a":val===false?"#dc2626":"#94a3b8"}}>{val===true?"✔":val===false?"✘":"—"}</button>
-                  </td>;})}
+                  {MONTHS.map(function(m){
+                    var val=accel[r.n]?accel[r.n][m]:null;
+                    return <td key={m} style={{padding:"3px 3px",textAlign:"center"}}>
+                      <button onClick={function(){toggleAccel(r.n,m);}} style={{width:30,height:28,borderRadius:5,border:"none",cursor:"pointer",fontSize:14,fontWeight:700,background:val===true?"#dcfce7":val===false?"#fee2e2":"#f1f5f9",color:val===true?"#16a34a":val===false?"#dc2626":"#94a3b8"}}>{val===true?"✔":val===false?"✘":"—"}</button>
+                    </td>;
+                  })}
                   <td style={{padding:"7px 8px",textAlign:"center",fontWeight:700,color:hits>0?"#16a34a":"#94a3b8"}}>{hits}</td>
                 </tr>;
               })}</tbody>
