@@ -50,19 +50,20 @@ const STATUS_CFG = {resigned:{label:"Resigned",bg:"#fee2e2",color:"#dc2626"},mat
 const SEG_MAP = {"ENT Builders":"ENT","ENT Hunters":"ENT","SME Jetzsetters":"SME J","SME Strikers":"SME O","Channels":"Channels","Upsell":"Upsell SME"};
 const TABS = ["📊 Segment Summary","📋 Rep Summary","📥 Data Entry","🏆 Leaderboard","👥 Teams","⚡ Accelerator"];
 
-const SEGMENTS = ["ENT","SME","U/S"];
+const SEGMENTS = ["ENT","SME","US"];
+const SEG_LABELS = {"ENT":"ENT","SME":"SME","US":"U/S"};
 const SEG_TARGETS = {
   ENT: {
     MRR: [540000,540000,540000,900000,900000,900000,900000,900000,900000,720000,720000,540000],
-    "E/F": [40000,40000,40000,40000,40000,40000,40000,40000,40000,40000,40000,40000],
+    EmFin: [40000,40000,40000,40000,40000,40000,40000,40000,40000,40000,40000,40000],
   },
   SME: {
     MRR: [540000,540000,540000,900000,900000,900000,900000,900000,900000,720000,720000,540000],
-    "E/F": [50000,50000,50000,50000,50000,50000,50000,50000,50000,50000,50000,50000],
+    EmFin: [50000,50000,50000,50000,50000,50000,50000,50000,50000,50000,50000,50000],
   },
-  "U/S": {
+  US: {
     MRR: [380000,380000,380000,580000,580000,580000,580000,580000,580000,480000,480000,420000],
-    "E/F": [150000,150000,150000,150000,150000,150000,150000,150000,150000,150000,150000,150000],
+    EmFin: [150000,150000,150000,150000,150000,150000,150000,150000,150000,150000,150000,150000],
   },
 };
 
@@ -174,14 +175,13 @@ function App() {
   const [saving, setSaving]       = useState(false);
   const [lastSaved, setLastSaved] = useState(null);
     const d={};
-    SEGMENTS.forEach(seg=>{d[seg]={MRR:{},["E/F"]:{}}; MONTHS.forEach(m=>{d[seg].MRR[m]=0;d[seg]["E/F"][m]=0;});});
-    // Seed from screenshot
+    SEGMENTS.forEach(seg=>{d[seg]={MRR:{},EmFin:{}}; MONTHS.forEach(m=>{d[seg].MRR[m]=0;d[seg].EmFin[m]=0;});});
     d.ENT.MRR={Jan:369522,Feb:470000,Mar:306883,Apr:0,May:0,Jun:0,Jul:0,Aug:0,Sep:0,Oct:0,Nov:0,Dec:0};
-    d.ENT["E/F"]={Jan:20000,Feb:17500,Mar:0,Apr:0,May:0,Jun:0,Jul:0,Aug:0,Sep:0,Oct:0,Nov:0,Dec:0};
+    d.ENT.EmFin={Jan:20000,Feb:17500,Mar:0,Apr:0,May:0,Jun:0,Jul:0,Aug:0,Sep:0,Oct:0,Nov:0,Dec:0};
     d.SME.MRR={Jan:797090,Feb:1039680,Mar:463200,Apr:0,May:0,Jun:0,Jul:0,Aug:0,Sep:0,Oct:0,Nov:0,Dec:0};
-    d.SME["E/F"]={Jan:88990,Feb:122850,Mar:49300,Apr:0,May:0,Jun:0,Jul:0,Aug:0,Sep:0,Oct:0,Nov:0,Dec:0};
-    d["U/S"].MRR={Jan:571361,Feb:390686,Mar:45000,Apr:0,May:0,Jun:0,Jul:0,Aug:0,Sep:0,Oct:0,Nov:0,Dec:0};
-    d["U/S"]["E/F"]={Jan:87050,Feb:123300,Mar:109900,Apr:0,May:0,Jun:0,Jul:0,Aug:0,Sep:0,Oct:0,Nov:0,Dec:0};
+    d.SME.EmFin={Jan:88990,Feb:122850,Mar:49300,Apr:0,May:0,Jun:0,Jul:0,Aug:0,Sep:0,Oct:0,Nov:0,Dec:0};
+    d.US.MRR={Jan:571361,Feb:390686,Mar:45000,Apr:0,May:0,Jun:0,Jul:0,Aug:0,Sep:0,Oct:0,Nov:0,Dec:0};
+    d.US.EmFin={Jan:87050,Feb:123300,Mar:109900,Apr:0,May:0,Jun:0,Jul:0,Aug:0,Sep:0,Oct:0,Nov:0,Dec:0};
     return d;
   });
   const [saving, setSaving]       = useState(false);
@@ -314,13 +314,14 @@ function App() {
 
         {tab===0&&<div>
           <b style={{color:"#1e3a8a",fontSize:15,display:"block",marginBottom:14}}>📊 Segment Summary</b>
-          {["MRR","E/F"].map(adj=>{
-            const grandTotT=SEGMENTS.reduce((s,seg)=>s+MONTHS.reduce((ss,m)=>ss+(SEG_TARGETS[seg][adj][MONTHS.indexOf(m)]||0),0),0);
+          {["MRR","EF"].map(adj=>{
+            const adjLabel = adj==="EF"?"E/F":"MRR";
+            const grandTotT=SEGMENTS.reduce((s,seg)=>s+MONTHS.reduce((ss,m,i)=>ss+(SEG_TARGETS[seg][adj][i]||0),0),0);
             const grandTotA=SEGMENTS.reduce((s,seg)=>s+MONTHS.reduce((ss,m)=>ss+(segActuals[seg][adj][m]||0),0),0);
-            const grandYtdT=SEGMENTS.reduce((s,seg)=>s+MONTHS.slice(0,mi+1).reduce((ss,m)=>ss+(SEG_TARGETS[seg][adj][MONTHS.indexOf(m)]||0),0),0);
+            const grandYtdT=SEGMENTS.reduce((s,seg)=>s+MONTHS.slice(0,mi+1).reduce((ss,m,i)=>ss+(SEG_TARGETS[seg][adj][i]||0),0),0);
             const grandYtdA=SEGMENTS.reduce((s,seg)=>s+MONTHS.slice(0,mi+1).reduce((ss,m)=>ss+(segActuals[seg][adj][m]||0),0),0);
             return <div key={adj} style={{marginBottom:24}}>
-              <div style={{fontWeight:700,fontSize:12,color:"#475569",marginBottom:8,textTransform:"uppercase",letterSpacing:1}}>{adj}</div>
+              <div style={{fontWeight:700,fontSize:12,color:"#475569",marginBottom:8,textTransform:"uppercase",letterSpacing:1}}>{adjLabel}</div>
               <div style={{overflowX:"auto"}}>
                 <table style={{borderCollapse:"collapse",width:"100%",background:"#fff",borderRadius:8,boxShadow:"0 1px 3px rgba(0,0,0,.08)",fontSize:12}}>
                   <thead>
@@ -344,9 +345,10 @@ function App() {
                       const ap = pct(ytdA,ytdT);
                       const bg = isGrand?"#f0f4ff":si%2===0?"#f8fafc":"#fff";
                       const color = isGrand?"#1e3a8a":"#374151";
+                      const segLabel = isGrand?"Sales (Total)":(SEG_LABELS[seg]||seg);
                       return [
                         <tr key={seg+"T"} style={{background:bg}}>
-                          <td style={{padding:"5px 12px",fontWeight:isGrand?700:600,color,borderTop:"2px solid #e2e8f0"}} rowSpan={3}>{isGrand?"Sales (Total)":seg}</td>
+                          <td style={{padding:"5px 12px",fontWeight:isGrand?700:600,color,borderTop:"2px solid #e2e8f0"}} rowSpan={3}>{segLabel}</td>
                           <td style={{padding:"5px 5px",color:"#94a3b8",fontSize:11,borderTop:"2px solid #e2e8f0"}}>Target</td>
                           {MONTHS.map((m,i)=><td key={m} style={{padding:"5px 5px",textAlign:"right",borderTop:"2px solid #e2e8f0"}}>{fmt(targets[i]||0)}</td>)}
                           <td style={{padding:"5px 8px",textAlign:"right",fontWeight:600,borderTop:"2px solid #e2e8f0"}}>{fmt(totT)}</td>
@@ -355,15 +357,15 @@ function App() {
                         </tr>,
                         <tr key={seg+"A"} style={{background:isGrand?"#e8eeff":si%2===0?"#eff6ff":"#f0f9ff"}}>
                           <td style={{padding:"5px 5px",color:"#2563eb",fontSize:11,fontWeight:600}}>Actual</td>
-                          {MONTHS.map((m,mi2)=>{
+                          {MONTHS.map((m)=>{
                             if (isGrand) return <td key={m} style={{padding:"5px 5px",textAlign:"right",color:"#2563eb",fontWeight:600}}>{fmt(SEGMENTS.reduce((s,sg)=>s+(segActuals[sg][adj][m]||0),0))}</td>;
-                            const cid=`seg-${seg}-${adj}-${m}`;
+                            const cid="seg-"+seg+"-"+adj+"-"+m;
                             const val=segActuals[seg]?.[adj]?.[m]||0;
                             return <td key={m} style={{padding:"2px 3px",textAlign:"right"}}>
                               {editId===cid?
                                 <input autoFocus type="number" defaultValue={val}
-                                  onBlur={e=>{const nsa={...segActuals,[seg]:{...segActuals[seg],[adj]:{...segActuals[seg][adj],[m]:Number(e.target.value)||0}}};setSegActuals(nsa);save({segActuals:nsa});setEditId(null);}}
-                                  onKeyDown={e=>{if(e.key==="Enter"){const nsa={...segActuals,[seg]:{...segActuals[seg],[adj]:{...segActuals[seg][adj],[m]:Number(e.target.value)||0}}};setSegActuals(nsa);save({segActuals:nsa});setEditId(null);}}}
+                                  onBlur={e=>{const nsa=Object.assign({},segActuals);nsa[seg]=Object.assign({},nsa[seg]);nsa[seg][adj]=Object.assign({},nsa[seg][adj]);nsa[seg][adj][m]=Number(e.target.value)||0;setSegActuals(nsa);save({segActuals:nsa});setEditId(null);}}
+                                  onKeyDown={e=>{if(e.key==="Enter"){const nsa=Object.assign({},segActuals);nsa[seg]=Object.assign({},nsa[seg]);nsa[seg][adj]=Object.assign({},nsa[seg][adj]);nsa[seg][adj][m]=Number(e.target.value)||0;setSegActuals(nsa);save({segActuals:nsa});setEditId(null);}}}
                                   style={{width:65,padding:"2px 3px",fontSize:11,border:"2px solid #2563eb",borderRadius:3,textAlign:"right"}}/>
                               :<span onClick={()=>setEditId(cid)} style={{cursor:"pointer",display:"block",padding:"3px 5px",borderRadius:3,fontSize:12,color:val>0?"#1d4ed8":"#94a3b8",background:val>0?"#dbeafe":"transparent"}}>{fmt(val)}</span>}
                             </td>;
@@ -377,7 +379,7 @@ function App() {
                             const T=targets[i]||0;
                             const A=isGrand?SEGMENTS.reduce((s,sg)=>s+(segActuals[sg][adj][m]||0),0):segActuals[seg]?.[adj]?.[m]||0;
                             const p=pct(A,T);
-                            return <td key={m} style={{padding:"3px 5px",textAlign:"right",fontSize:11,fontWeight:600,color:T>0?aC(p):"#94a3b8"}}>{T>0?`${p.toFixed(1)}%`:"—"}</td>;
+                            return <td key={m} style={{padding:"3px 5px",textAlign:"right",fontSize:11,fontWeight:600,color:T>0?aC(p):"#94a3b8"}}>{T>0?p.toFixed(1)+"%":"—"}</td>;
                           })}
                           <td style={{padding:"3px 8px",textAlign:"right",fontSize:11,fontWeight:600,color:aC(pct(totA,totT))}}>{pct(totA,totT).toFixed(1)}%</td>
                           <td style={{padding:"3px 8px",textAlign:"right",fontSize:11,fontWeight:600,color:aC(ap)}}>{ap.toFixed(1)}%</td>
