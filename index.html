@@ -41,7 +41,7 @@ var useEffect = React.useEffect;
 var useCallback = React.useCallback;
 var useMemo = React.useMemo;
 
-var MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+var EDIT_PASSWORD = "sprout2026";
 var ADJ = ["MRR","E/F","One-time Fees","Implementation"];
 var TEAMS = ["ENT Builders","ENT Hunters","SME Jetzsetters","SME Strikers","Channels","Upsell"];
 var TCOL = {"ENT Builders":"#092903","ENT Hunters":"#8139EE","SME Jetzsetters":"#1679FA","SME Strikers":"#FF7F00","Channels":"#239A0D","Upsell":"#dc2626"};
@@ -138,7 +138,7 @@ function buildData() {
 function buildMeta() {
   var d = {};
   INIT_REPS.forEach(function(r){ d[r.n]={fc:0,ef:false,mq:false,nl:0}; });
-  var seeds = {"Katryn Saldajeno":{fc:22000,ef:false,mq:true,nl:2},"Crystel Ambrosio":{fc:288280,ef:true,mq:true,nl:1},"Ferdie Salvosa":{fc:79500,ef:true,mq:true,nl:4},"Osheri Fima":{fc:101250,ef:true,mq:false,nl:2},"Rizzalyn Berce":{fc:57580,ef:false,mq:false,nl:1},"Akisha Abella":{fc:74000,ef:false,mq:false,nl:2},"Reine Suarez":{fc:68200,ef:true,mq:false,nl:3},"Rona Pablo":{fc:76370,ef:false,mq:false,nl:2},"Jethro Jamelo":{fc:85000,ef:true,mq:false,nl:2},"Mat Galuego":{fc:69500,ef:false,mq:false,nl:2},"Gel Riboroso":{fc:66500,ef:false,mq:false,nl:1},"Riezhel Punzalan":{fc:48200,ef:false,mq:false,nl:0},"Nicco Tioseco":{fc:94300,ef:false,mq:false,nl:3},"Brian Azarcon":{fc:0,ef:false,mq:false,nl:2},"Lana Pineda":{fc:97750,ef:false,mq:false,nl:1},"Mariam Pulido":{fc:486880,ef:false,mq:false,nl:0}};
+  var seeds = {"Katryn Saldajeno":{fc:22000,ef:false,mq:true,nl:2},"Crystel Ambrosio":{fc:288280,ef:true,mq:true,nl:1},"Ferdie Salvosa":{fc:79500,ef:true,mq:true,nl:4},"Osheri Fima":{fc:101250,ef:true,mq:false,nl:2},"Rizzalyn Berce":{fc:57580,ef:false,mq:false,nl:1},"Akisha Abella":{fc:74000,ef:false,mq:false,nl:2},"Reine Suarez":{fc:68200,ef:true,mq:false,nl:3},"Rona Pablo":{fc:76370,ef:false,mq:false,nl:2},"Jethro Jamelo":{fc:85000,ef:true,mq:false,nl:2},"Mat Galuego":{fc:69500,ef:false,mq:false,nl:2},"Gel Riboroso":{fc:66500,ef:false,mq:false,nl:1},"Riezhel Punzalan":{fc:48200,ef:false,mq:false,nl:0},"Nicco Tioseco":{fc:94300,ef:false,mq:false,nl:3},"Brian Azarcon":{fc:0,ef:false,mq:false,nl:2},"Lana Pineda":{fc:97750,ef:false,mq:false,nl:1},"Miriam Pulido":{fc:486880,ef:false,mq:false,nl:0}};
   Object.keys(seeds).forEach(function(k){ if(d[k]) d[k]=seeds[k]; });
   return d;
 }
@@ -179,6 +179,9 @@ function App() {
   var showInactS=useState(false), sortColS=useState(null), sortDirS=useState("desc"), showAddS=useState(false);
   var newRepS=useState({name:"",team:"ENT Builders",status:""}), dbReadyS=useState(false), savingS=useState(false), lastSavedS=useState(null);
   var showEditRepS=useState(null);
+  var unlockedS=useState(false);
+  var showLockModalS=useState(false);
+  var pwInputS=useState("");
 
   var tab=tabS[0]; var setTab=tabS[1];
   var data=dataS[0]; var setData=dataS[1];
@@ -199,6 +202,9 @@ function App() {
   var saving=savingS[0]; var setSaving=savingS[1];
   var lastSaved=lastSavedS[0]; var setLastSaved=lastSavedS[1];
   var showEditRep=showEditRepS[0]; var setShowEditRep=showEditRepS[1];
+  var unlocked=unlockedS[0]; var setUnlocked=unlockedS[1];
+  var showLockModal=showLockModalS[0]; var setShowLockModal=showLockModalS[1];
+  var pwInput=pwInputS[0]; var setPwInput=pwInputS[1];
 
   var mi = MONTHS.indexOf(curMon);
 
@@ -318,6 +324,9 @@ function App() {
         </div>
         <div style={{display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}>
           <span style={{fontSize:11,color:"#A6EB93"}}>{!dbReady?"⏳ Connecting...":saving?"💾 Saving...":lastSaved?"✅ Saved "+lastSaved:"✅ Connected"}</span>
+          <button onClick={function(){ if(unlocked){ setUnlocked(false); } else { setShowLockModal(true); setPwInput(""); } }} style={{padding:"5px 12px",borderRadius:6,border:"2px solid "+(unlocked?"#32CE13":"#4A7C59"),background:unlocked?"#32CE13":"transparent",color:unlocked?"#092903":"#A6EB93",fontSize:12,fontWeight:700,cursor:"pointer"}}>
+            {unlocked?"🔓 Edit Mode ON":"🔒 View Only"}
+          </button>
           <div style={{display:"flex",alignItems:"center",gap:6}}>
             <span style={{fontSize:12,color:"#A6EB93"}}>Month:</span>
             <select value={curMon} onChange={function(e){changeMonth(e.target.value);}} style={{padding:"4px 10px",borderRadius:6,border:"2px solid #32CE13",fontSize:13,fontWeight:600,color:"#092903",background:"#fff"}}>
@@ -326,6 +335,21 @@ function App() {
           </div>
         </div>
       </div>
+
+      {/* ── PASSWORD MODAL ── */}
+      {showLockModal&&(
+        <div style={{position:"fixed",inset:0,background:"rgba(9,41,3,0.7)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center"}}>
+          <div style={{background:"#fff",borderRadius:12,padding:28,width:300,boxShadow:"0 8px 32px rgba(9,41,3,0.3)"}}>
+            <div style={{fontWeight:700,fontSize:16,marginBottom:6,color:"#092903"}}>🔒 Enter Edit Password</div>
+            <div style={{fontSize:12,color:"#4A7C59",marginBottom:16}}>Enter the password to enable editing</div>
+            <input type="password" value={pwInput} onChange={function(e){setPwInput(e.target.value);}} onKeyDown={function(e){if(e.key==="Enter"){if(pwInput===EDIT_PASSWORD){setUnlocked(true);setShowLockModal(false);}else{alert("Incorrect password");}setPwInput("");} }} placeholder="Password" autoFocus style={{width:"100%",padding:"9px 12px",borderRadius:6,border:"2px solid #A6EB93",fontSize:14,marginBottom:16,boxSizing:"border-box"}}/>
+            <div style={{display:"flex",gap:8,justifyContent:"flex-end"}}>
+              <button onClick={function(){setShowLockModal(false);setPwInput("");}} style={{padding:"8px 16px",borderRadius:6,border:"1px solid #A6EB93",background:"#fff",cursor:"pointer",fontSize:13,color:"#4A7C59"}}>Cancel</button>
+              <button onClick={function(){ if(pwInput===EDIT_PASSWORD){setUnlocked(true);setShowLockModal(false);}else{alert("Incorrect password");} setPwInput(""); }} style={{padding:"8px 16px",borderRadius:6,border:"none",background:"#32CE13",color:"#092903",cursor:"pointer",fontSize:13,fontWeight:700}}>Unlock</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── TABS ── */}
       <div style={{display:"flex",background:"#fff",borderBottom:"2px solid #E1F6C8",paddingLeft:12,overflowX:"auto"}}>
@@ -378,9 +402,9 @@ function App() {
                               var cid="seg-"+seg+"-"+adj+"-"+m;
                               var val=segA[seg]?segA[seg][adj][m]||0:0;
                               return <td key={m} style={{padding:"3px 3px",textAlign:"right"}}>
-                                {editId===cid?
+                                {editId===cid&&unlocked?
                                   <input autoFocus type="number" defaultValue={val} onBlur={function(e){ setSegActual(seg,adj,m,e.target.value); setEditId(null); }} onKeyDown={function(e){ if(e.key==="Enter"){ setSegActual(seg,adj,m,e.target.value); setEditId(null); }}} style={{width:68,padding:"2px 4px",fontSize:11,border:"2px solid #32CE13",borderRadius:3,textAlign:"right"}}/>
-                                  :<span onClick={function(){ setEditId(cid); }} style={{cursor:"pointer",display:"block",padding:"3px 5px",borderRadius:3,color:val>0?"#239A0D":"#94a3b8",background:val>0?"#C9F3BE":"transparent"}}>{fmt(val)}</span>}
+                                  :<span onClick={function(){ if(unlocked) setEditId(cid); }} style={{cursor:unlocked?"pointer":"default",display:"block",padding:"3px 5px",borderRadius:3,color:val>0?"#239A0D":"#94a3b8",background:val>0?"#C9F3BE":"transparent"}}>{fmt(val)}</span>}
                               </td>;
                             })}
                             <td style={{padding:"6px 10px",textAlign:"right",fontWeight:600,color:"#239A0D"}}>{fmt(totA)}</td>
@@ -450,7 +474,7 @@ function App() {
               <div style={{display:"flex",gap:10,alignItems:"center",flexWrap:"wrap"}}>
                 <div style={{display:"flex",gap:8,fontSize:11}}>{[["#32CE13","≥100%"],["#1679FA","80–99%"],["#FF7F00","60–79%"],["#dc2626","<60%"]].map(function(x){ return <span key={x[1]} style={{display:"flex",alignItems:"center",gap:3}}><span style={{width:8,height:8,borderRadius:"50%",background:x[0],display:"inline-block"}}/><span style={{color:"#4A7C59"}}>{x[1]}</span></span>; })}</div>
                 <label style={{display:"flex",alignItems:"center",gap:5,fontSize:12,color:"#4A7C59",cursor:"pointer"}}><input type="checkbox" checked={showInact} onChange={function(e){ setShowInact(e.target.checked); }}/> Show inactive</label>
-                <button onClick={function(){ setShowAdd(true); }} style={{padding:"6px 14px",background:"#32CE13",color:"#092903",border:"none",borderRadius:6,fontSize:12,fontWeight:700,cursor:"pointer"}}>+ Add Rep</button>
+                {unlocked&&<button onClick={function(){ setShowAdd(true); }} style={{padding:"6px 14px",background:"#32CE13",color:"#092903",border:"none",borderRadius:6,fontSize:12,fontWeight:700,cursor:"pointer"}}>+ Add Rep</button>}
               </div>
             </div>
 
@@ -492,7 +516,7 @@ function App() {
                     return <tr key={r.n} style={{background:bg,borderBottom:"1px solid #E1F6C8",opacity:off?0.65:1}}>
                       <td style={{padding:"8px 10px",fontWeight:600,position:"sticky",left:0,background:bg}}>
                         <div style={{display:"flex",alignItems:"center",flexWrap:"wrap",gap:2}}>
-                          <span style={{cursor:"pointer",color:"#092903",textDecoration:"underline",textDecorationStyle:"dotted"}} onClick={function(){ setShowEditRep(r.n); }}>{r.n}</span>
+                        <span style={{cursor:unlocked?"pointer":"default",color:"#092903",textDecoration:unlocked?"underline":"none",textDecorationStyle:"dotted"}} onClick={function(){ if(unlocked) setShowEditRep(r.n); }}>{r.n}</span>
                           <Badge s={r.s}/>
                         </div>
                       </td>
@@ -501,13 +525,13 @@ function App() {
                       <td style={{padding:"8px 10px",textAlign:"right",color:"#239A0D",fontWeight:600}}>{fmt(yA)}</td>
                       <td style={{padding:"8px 10px",textAlign:"center"}}><Chip p={yP}/></td>
                       <td style={{padding:"8px 10px",textAlign:"right",fontWeight:600,color:togo>=0?"#32CE13":"#dc2626"}}>{(togo>=0?"+":"")+fmt(togo)}</td>
-                      <td style={{padding:"4px 6px",textAlign:"right"}}>{editId==="fc-"+r.n?<input autoFocus type="number" defaultValue={fc} onBlur={function(e){setMetaF(r.n,"fc",Number(e.target.value)||0);setEditId(null);}} onKeyDown={function(e){if(e.key==="Enter"){setMetaF(r.n,"fc",Number(e.target.value)||0);setEditId(null);}}} style={{width:72,padding:"2px 4px",fontSize:12,border:"2px solid #32CE13",borderRadius:4,textAlign:"right"}}/>:<span onClick={function(){setEditId("fc-"+r.n);}} style={{cursor:"pointer",display:"block",padding:"2px 6px",borderRadius:4,color:fc>0?"#239A0D":"#94a3b8",background:fc>0?"#E9FAE5":"transparent"}}>{fmt(fc)}</span>}</td>
+                      <td style={{padding:"4px 6px",textAlign:"right"}}>{editId==="fc-"+r.n&&unlocked?<input autoFocus type="number" defaultValue={fc} onBlur={function(e){setMetaF(r.n,"fc",Number(e.target.value)||0);setEditId(null);}} onKeyDown={function(e){if(e.key==="Enter"){setMetaF(r.n,"fc",Number(e.target.value)||0);setEditId(null);}}} style={{width:72,padding:"2px 4px",fontSize:12,border:"2px solid #32CE13",borderRadius:4,textAlign:"right"}}/>:<span onClick={function(){if(unlocked)setEditId("fc-"+r.n);}} style={{cursor:unlocked?"pointer":"default",display:"block",padding:"2px 6px",borderRadius:4,color:fc>0?"#239A0D":"#94a3b8",background:fc>0?"#E9FAE5":"transparent"}}>{fmt(fc)}</span>}</td>
                       <td style={{padding:"8px 10px",textAlign:"right",color:"#239A0D",fontWeight:600}}>{fmt(mA)}</td>
                       <td style={{padding:"8px 10px",textAlign:"right",fontWeight:600,color:fToGo>=0?"#32CE13":"#dc2626"}}>{(fToGo>=0?"+":"")+fmt(fToGo)}</td>
                       <td style={{padding:"8px 10px",textAlign:"center"}}>{fAcc!==null?<Chip p={fAcc}/>:"—"}</td>
-                      <td style={{padding:"8px 10px",textAlign:"center"}}><input type="checkbox" checked={meta[r.n]?meta[r.n].ef:false} onChange={function(e){setMetaF(r.n,"ef",e.target.checked);}} style={{width:15,height:15,cursor:"pointer",accentColor:"#32CE13"}}/></td>
-                      <td style={{padding:"4px 6px",textAlign:"center"}}><input type="number" min="0" value={meta[r.n]?meta[r.n].nl:0} onChange={function(e){setMetaF(r.n,"nl",Number(e.target.value)||0);}} style={{width:40,padding:"2px 4px",fontSize:12,border:"1px solid #A6EB93",borderRadius:4,textAlign:"center"}}/></td>
-                      <td style={{padding:"8px 10px",textAlign:"center"}}><input type="checkbox" checked={meta[r.n]?meta[r.n].mq:false} onChange={function(e){setMetaF(r.n,"mq",e.target.checked);}} style={{width:15,height:15,cursor:"pointer",accentColor:"#32CE13"}}/></td>
+                      <td style={{padding:"8px 10px",textAlign:"center"}}><input type="checkbox" checked={meta[r.n]?meta[r.n].ef:false} onChange={function(e){if(unlocked)setMetaF(r.n,"ef",e.target.checked);}} disabled={!unlocked} style={{width:15,height:15,cursor:unlocked?"pointer":"default",accentColor:"#32CE13"}}/></td>
+                      <td style={{padding:"4px 6px",textAlign:"center"}}><input type="number" min="0" value={meta[r.n]?meta[r.n].nl:0} onChange={function(e){if(unlocked)setMetaF(r.n,"nl",Number(e.target.value)||0);}} readOnly={!unlocked} style={{width:40,padding:"2px 4px",fontSize:12,border:"1px solid #A6EB93",borderRadius:4,textAlign:"center",cursor:unlocked?"text":"default"}}/></td>
+                      <td style={{padding:"8px 10px",textAlign:"center"}}><input type="checkbox" checked={meta[r.n]?meta[r.n].mq:false} onChange={function(e){if(unlocked)setMetaF(r.n,"mq",e.target.checked);}} disabled={!unlocked} style={{width:15,height:15,cursor:unlocked?"pointer":"default",accentColor:"#32CE13"}}/></td>
                     </tr>;
                   })}
                 </tbody>
@@ -553,7 +577,7 @@ function App() {
                         var cid=r.n+"-"+selAdj+"-"+m;
                         var val=(data[r.n]&&data[r.n][selAdj]&&data[r.n][selAdj][m])?data[r.n][selAdj][m].A:0;
                         return <td key={m} style={{padding:"2px 3px",textAlign:"right"}}>
-                          {editId===cid?<input autoFocus type="number" defaultValue={val} onBlur={function(e){setActual(r.n,selAdj,m,e.target.value);setEditId(null);}} onKeyDown={function(e){if(e.key==="Enter"){setActual(r.n,selAdj,m,e.target.value);setEditId(null);}}} style={{width:62,padding:"2px 3px",fontSize:11,border:"2px solid #32CE13",borderRadius:3,textAlign:"right"}}/>:<span onClick={function(){setEditId(cid);}} style={{cursor:"pointer",display:"block",padding:"3px 5px",borderRadius:3,color:val>0?"#239A0D":"#94a3b8",background:val>0?"#C9F3BE":"transparent"}}>{fmt(val)}</span>}
+                          {editId===cid&&unlocked?<input autoFocus type="number" defaultValue={val} onBlur={function(e){setActual(r.n,selAdj,m,e.target.value);setEditId(null);}} onKeyDown={function(e){if(e.key==="Enter"){setActual(r.n,selAdj,m,e.target.value);setEditId(null);}}} style={{width:62,padding:"2px 3px",fontSize:11,border:"2px solid #32CE13",borderRadius:3,textAlign:"right"}}/>:<span onClick={function(){if(unlocked)setEditId(cid);}} style={{cursor:unlocked?"pointer":"default",display:"block",padding:"3px 5px",borderRadius:3,color:val>0?"#239A0D":"#94a3b8",background:val>0?"#C9F3BE":"transparent"}}>{fmt(val)}</span>}
                         </td>;
                       })}
                       <td style={{padding:"6px 8px",textAlign:"right",fontWeight:600,color:"#239A0D"}}>{fmt(totA)}</td>
@@ -687,7 +711,7 @@ function App() {
                     {MONTHS.map(function(m){
                       var val=accel[r.n]?accel[r.n][m]:null;
                       return <td key={m} style={{padding:"3px 3px",textAlign:"center"}}>
-                        <button onClick={function(){ toggleAccel(r.n,m); }} style={{width:32,height:28,borderRadius:6,border:"none",cursor:"pointer",fontSize:14,fontWeight:700,background:val===true?"#E9FAE5":val===false?"#fee2e2":"#F7F9ED",color:val===true?"#32CE13":val===false?"#dc2626":"#94a3b8"}}>{val===true?"✔":val===false?"✘":"—"}</button>
+                        <button onClick={function(){ if(unlocked) toggleAccel(r.n,m); }} style={{width:32,height:28,borderRadius:6,border:"none",cursor:unlocked?"pointer":"default",fontSize:14,fontWeight:700,background:val===true?"#E9FAE5":val===false?"#fee2e2":"#F7F9ED",color:val===true?"#32CE13":val===false?"#dc2626":"#94a3b8",opacity:unlocked?1:0.7}}>{val===true?"✔":val===false?"✘":"—"}</button>
                       </td>;
                     })}
                     <td style={{padding:"8px",textAlign:"center",fontWeight:700,color:hits>0?"#32CE13":"#94a3b8",fontSize:14}}>{hits}</td>
