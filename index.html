@@ -43,6 +43,7 @@ var useMemo = React.useMemo;
 
 var EDIT_PASSWORD = "sprout2026";
 var ADJ = ["MRR","E/F","One-time Fees","Implementation"];
+var MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 var TEAMS = ["ENT Builders","ENT Hunters","SME Jetzsetters","SME Strikers","Channels","Upsell"];
 var TCOL = {"ENT Builders":"#092903","ENT Hunters":"#8139EE","SME Jetzsetters":"#1679FA","SME Strikers":"#FF7F00","Channels":"#239A0D","Upsell":"#dc2626"};
 var STCFG = {
@@ -434,7 +435,6 @@ function App() {
         {/* ── TAB 1: REP SUMMARY ── */}
         {tab===1&&(
           <div>
-            {/* Add Rep Modal */}
             {showAdd&&(
               <div style={{position:"fixed",inset:0,background:"rgba(9,41,3,0.6)",zIndex:100,display:"flex",alignItems:"center",justifyContent:"center"}}>
                 <div style={{background:"#fff",borderRadius:12,padding:24,width:320,boxShadow:"0 8px 32px rgba(9,41,3,0.2)"}}>
@@ -453,7 +453,6 @@ function App() {
               </div>
             )}
 
-            {/* Edit Rep Status Modal */}
             {showEditRep&&(
               <div style={{position:"fixed",inset:0,background:"rgba(9,41,3,0.6)",zIndex:100,display:"flex",alignItems:"center",justifyContent:"center"}}>
                 <div style={{background:"#fff",borderRadius:12,padding:24,width:300,boxShadow:"0 8px 32px rgba(9,41,3,0.2)"}}>
@@ -516,7 +515,7 @@ function App() {
                     return <tr key={r.n} style={{background:bg,borderBottom:"1px solid #E1F6C8",opacity:off?0.65:1}}>
                       <td style={{padding:"8px 10px",fontWeight:600,position:"sticky",left:0,background:bg}}>
                         <div style={{display:"flex",alignItems:"center",flexWrap:"wrap",gap:2}}>
-                        <span style={{cursor:unlocked?"pointer":"default",color:"#092903",textDecoration:unlocked?"underline":"none",textDecorationStyle:"dotted"}} onClick={function(){ if(unlocked) setShowEditRep(r.n); }}>{r.n}</span>
+                          <span style={{cursor:unlocked?"pointer":"default",color:"#092903",textDecoration:unlocked?"underline":"none",textDecorationStyle:"dotted"}} onClick={function(){ if(unlocked) setShowEditRep(r.n); }}>{r.n}</span>
                           <Badge s={r.s}/>
                         </div>
                       </td>
