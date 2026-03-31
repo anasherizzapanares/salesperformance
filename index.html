@@ -147,7 +147,7 @@ function buildMeta() {
 function buildAccel() {
   var d = {};
   INIT_REPS.forEach(function(r){ d[r.n]={}; MONTHS.forEach(function(m){ d[r.n][m]=null; }); });
-  var hits = {"Mat Galuego":{Jan:true,Feb:true},"Crystel Ambrosio":{Feb:true},"Rona Pablo":{Jan:false,Feb:true},"Ferdie Salvosa":{Jan:true,Feb:true,Mar:true},"Jethro Jamelo":{Jan:true,Feb:true},"Reine Suarez":{Jan:true,Feb:true},"Gel Riboroso":{Jan:true,Feb:true},"Nicco Tioseco":{Jan:false,Feb:false},"Brian Azarcon":{Jan:false,Feb:false},"Osheri Fima":{Jan:false,Feb:true},"Akisha Abella":{Jan:true,Feb:true},"Rizzalyn Berce":{Jan:true,Feb:true},"Rachelle Serneo":{Jan:false,Feb:false},"Riezhel Punzalan":{Jan:false,Feb:true},"Chress Espineda":{Jan:false,Feb:false},"Kurt Ang":{Jan:true,Feb:false},"Thea Estrella":{Jan:false,Feb:false}};
+        var hits = {"Mat Galuego":{Jan:true,Feb:true},"Crystel Ambrocio":{Feb:true},"Rona Pablo":{Jan:false,Feb:true},"Ferdie Salvosa":{Jan:true,Feb:true,Mar:true},"Jethro Jamelo":{Jan:true,Feb:true},"Reine Suarez":{Jan:true,Feb:true},"Gel Riboroso":{Jan:true,Feb:true},"Nicco Tioseco":{Jan:false,Feb:false},"Brian Azarcon":{Jan:false,Feb:false},"Osheri Fima":{Jan:false,Feb:true},"Akisha Abella":{Jan:true,Feb:true},"Rizzalyn Berce":{Jan:true,Feb:true},"Rachelle Serneo":{Jan:false,Feb:false},"Riezhel Punzalan":{Jan:false,Feb:true},"Chress Espineda":{Jan:false,Feb:false},"Kurt Ang":{Jan:true,Feb:false},"Thea Estrella":{Jan:false,Feb:false}};
   Object.keys(hits).forEach(function(name){ if(d[name]){ var mo=hits[name]; Object.keys(mo).forEach(function(m){ d[name][m]=mo[m]; }); } });
   return d;
 }
