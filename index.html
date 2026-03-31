@@ -643,7 +643,11 @@ function App() {
               {TEAMS.map(function(tm){
                 var tmReps=reps.filter(function(r){ return r.t===tm; });
                 if(!tmReps.length) return null;
-                var sums=tmReps.map(function(r){ var s=repSum(r.n); s.n=r.n; s.s=r.s; return s; });
+                var sums=tmReps.map(function(r){
+                  var mrrT=MONTHS.reduce(function(s,m){ return s+((data[r.n]&&data[r.n].MRR&&data[r.n].MRR[m])?data[r.n].MRR[m].T:0); },0);
+                  var mrrA=MONTHS.reduce(function(s,m){ return s+((data[r.n]&&data[r.n].MRR&&data[r.n].MRR[m])?data[r.n].MRR[m].A:0); },0);
+                  return {n:r.n, s:r.s, all:{T:mrrT, A:mrrA, p:pct(mrrA,mrrT)}};
+                });
                 var activeInTeam=sums.filter(function(r){ return !r.s; });
                 var inactInTeam=sums.filter(function(r){ return !!r.s; });
                 activeInTeam.sort(function(a,b){ return b.all.p-a.all.p; });
