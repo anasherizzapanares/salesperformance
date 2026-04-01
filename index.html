@@ -48,7 +48,7 @@ var STCFG = {
   maternity:{label:"Maternity Leave",bg:"#FFF4D3",color:"#FF7F00"},
   tbh:{label:"TBH",bg:"#EEE9FE",color:"#8139EE"}
 };
-var SEGMAP = {"ENT Builders":"ENT","ENT Hunters":"ENT","SME Jetzsetters":"SME J","SME Strikers":"SME O","Channels":"Channels","Upsell":"Upsell SME"};
+var SEGMAP = {"ENT Builders":"ENT","ENT Hunters":"ENT","SME Jetzsetters":"SME J","SME Strikers":"SME O","Channels":"Channels","Upsell":"Upsell ENT"};
 var TABS = ["📊 Segment","📋 Rep Summary","📥 Data Entry","🏆 Leaderboard","👥 Teams","⚡ Accelerator"];
 var SEGS = ["ENT","SME","US"];
 var SEGLABEL = {ENT:"ENT",SME:"SME",US:"U/S"};
@@ -70,7 +70,7 @@ var INIT_REPS = [
   {n:"Rizzalyn Berce",t:"SME Strikers"},{n:"Akisha Abella",t:"SME Strikers"},
   {n:"Brian Azarcon",t:"SME Strikers"},{n:"Herbert Salvaleon",t:"SME Strikers",s:"resigned"},
   {n:"Rachelle Serneo",t:"SME Strikers",s:"maternity"},{n:"Mat Galuego",t:"Channels"},
-  {n:"Ric Rogodon",t:"Upsell"},{n:"Chress Espineda",t:"Upsell"},
+  {n:"Ric Rigodon",t:"Upsell"},{n:"Chress Espineda",t:"Upsell"},
   {n:"Kurt Ang",t:"Upsell"},{n:"Javier Lopez",t:"Upsell"},
   {n:"Thea Estrella",t:"Upsell",s:"resigned"}
 ];
@@ -116,7 +116,7 @@ function buildData(){
   s("Herbert Salvaleon",[60000,60000,0,0,0,0,0,0,0,0,0,0],[37250,0,0,0,0,0,0,0,0,0,0,0],[5000,5000,0,0,0,0,0,0,0,0,0,0],[6400,0,0,0,0,0,0,0,0,0,0,0]);
   s("Rachelle Serneo",[60000,60000,0,0,100000,100000,100000,75000,75000,75000,0,0],[21000,51500,0,0,0,0,0,0,0,0,0,0],[5000,5000,0,0,5000,5000,5000,5000,5000,5000,0,0],[1750,3250,0,0,0,0,0,0,0,0,0,0]);
   s("Mat Galuego",[60000,60000,80000,110000,110000,110000,110000,110000,110000,90000,75000,75000],[98300,60500,27833,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,100000,0],[0,9350,0,0,0,0,0,0,0,0,0,0]);
-  s("Ric Rogodon",[80000,80000,80000,120000,120000,120000,120000,120000,120000,100000,100000,100000],[347000,227785,45000,0,0,0,0,0,0,0,0,0],[30000,30000,30000,30000,30000,30000,30000,30000,30000,30000,30000,30000],[55900,29450,0,0,0,0,0,0,0,0,0,0]);
+  s("Ric Rigodon",[80000,80000,80000,120000,120000,120000,120000,120000,120000,100000,100000,100000],[347000,227785,45000,0,0,0,0,0,0,0,0,0],[30000,30000,30000,30000,30000,30000,30000,30000,30000,30000,30000,30000],[55900,29450,0,0,0,0,0,0,0,0,0,0]);
   s("Chress Espineda",[60000,60000,80000,120000,120000,120000,120000,120000,120000,100000,100000,100000],[91796,74900,0,0,0,0,0,0,0,0,0,0],[20000,20000,20000,20000,20000,20000,20000,20000,20000,20000,20000,20000],[2300,17600,34350,0,0,0,0,0,0,0,0,0]);
   s("Kurt Ang",[70000,70000,70000,110000,110000,110000,110000,110000,110000,90000,90000,90000],[91950,9740,0,0,0,0,0,0,0,0,0,0],[20000,20000,20000,20000,20000,20000,20000,20000,20000,20000,20000,20000],[22350,9550,11950,0,0,0,0,0,0,0,0,0]);
   s("Javier Lopez",[80000,80000,80000,120000,120000,120000,120000,120000,120000,100000,100000,100000],[36415,73825,0,0,0,0,0,0,0,0,0,0],[30000,30000,30000,30000,30000,30000,30000,30000,30000,30000,30000,30000],[0,53300,63600,0,0,0,0,0,0,0,0,0]);
@@ -166,7 +166,7 @@ function App(){
   var curMonS=useState("Mar"),selTeamS=useState("ENT Builders"),selAdjS=useState("MRR"),editIdS=useState(null);
   var showInactS=useState(false),sortColS=useState(null),sortDirS=useState("desc"),showAddS=useState(false);
   var newRepS=useState({name:"",team:"ENT Builders",status:""}),dbReadyS=useState(false),savingS=useState(false),lastSavedS=useState(null);
-  var showEditRepS=useState(null),unlockedS=useState(false),showLockModalS=useState(false),pwInputS=useState("");
+  var repTeamFilterS=useState("All"),showEditRepS=useState(null),unlockedS=useState(false),showLockModalS=useState(false),pwInputS=useState("");
 
   var tab=tabS[0],setTab=tabS[1],data=dataS[0],setData=dataS[1],meta=metaS[0],setMeta=metaS[1];
   var accel=accelS[0],setAccel=accelS[1],reps=repsS[0],setReps=repsS[1],segA=segAS[0],setSegA=segAS[1];
@@ -176,7 +176,7 @@ function App(){
   var sortDir=sortDirS[0],setSortDir=sortDirS[1],showAdd=showAddS[0],setShowAdd=showAddS[1];
   var newRep=newRepS[0],setNewRep=newRepS[1],dbReady=dbReadyS[0],setDbReady=dbReadyS[1];
   var saving=savingS[0],setSaving=savingS[1],lastSaved=lastSavedS[0],setLastSaved=lastSavedS[1];
-  var showEditRep=showEditRepS[0],setShowEditRep=showEditRepS[1];
+  var repTeamFilter=repTeamFilterS[0],setRepTeamFilter=repTeamFilterS[1];var showEditRep=showEditRepS[0],setShowEditRep=showEditRepS[1];
   var unlocked=unlockedS[0],setUnlocked=unlockedS[1];
   var showLockModal=showLockModalS[0],setShowLockModal=showLockModalS[1];
   var pwInput=pwInputS[0],setPwInput=pwInputS[1];
@@ -271,7 +271,7 @@ function App(){
   var shownReps=showInact?reps:activeReps;
 
   var sortedReps=useMemo(function(){
-    return shownReps.slice().sort(function(a,b){
+    var fReps=repTeamFilter==="All"?shownReps:shownReps.filter(function(r){return r.t===repTeamFilter;});return fReps.slice().sort(function(a,b){
       if(!sortCol) return 0;
       var va=sortCol==="att"?pct(ytdA(a.n),ytdT(a.n)):ytdA(a.n);
       var vb=sortCol==="att"?pct(ytdA(b.n),ytdT(b.n)):ytdA(b.n);
@@ -450,7 +450,7 @@ function App(){
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12,flexWrap:"wrap",gap:8}}>
               <b style={{color:"#092903",fontSize:15}}>📋 Rep Summary — YTD Jan–{curMon}</b>
               <div style={{display:"flex",gap:10,alignItems:"center",flexWrap:"wrap"}}>
-                <div style={{display:"flex",gap:8,fontSize:11}}>{[["#32CE13","≥100%"],["#1679FA","80–99%"],["#FF7F00","60–79%"],["#dc2626","<60%"]].map(function(x){return <span key={x[1]} style={{display:"flex",alignItems:"center",gap:3}}><span style={{width:8,height:8,borderRadius:"50%",background:x[0],display:"inline-block"}}/><span style={{color:"#4A7C59"}}>{x[1]}</span></span>;})}</div>
+                <select value={repTeamFilter} onChange={function(e){setRepTeamFilter(e.target.value);}} style={{padding:"5px 10px",borderRadius:6,border:"1px solid #A6EB93",fontSize:12,color:"#092903"}}><option value="All">All Teams</option>{TEAMS.map(function(t){return <option key={t} value={t}>{t}</option>;})}</select><div style={{display:"flex",gap:8,fontSize:11}}>{[["#32CE13","≥100%"],["#1679FA","80–99%"],["#FF7F00","60–79%"],["#dc2626","<60%"]].map(function(x){return <span key={x[1]} style={{display:"flex",alignItems:"center",gap:3}}><span style={{width:8,height:8,borderRadius:"50%",background:x[0],display:"inline-block"}}/><span style={{color:"#4A7C59"}}>{x[1]}</span></span>;})}</div>
                 <label style={{display:"flex",alignItems:"center",gap:5,fontSize:12,color:"#4A7C59",cursor:"pointer"}}><input type="checkbox" checked={showInact} onChange={function(e){setShowInact(e.target.checked);}}/> Show inactive</label>
                 {unlocked&&<button onClick={function(){setShowAdd(true);}} style={{padding:"6px 14px",background:"#32CE13",color:"#092903",border:"none",borderRadius:6,fontSize:12,fontWeight:700,cursor:"pointer"}}>+ Add Rep</button>}
               </div>
@@ -578,7 +578,7 @@ function App(){
                       ];
                     });
                     // Team total row
-                    var activeTReps=teamReps.filter(function(r){return !r.s;});
+                    var activeTReps=showInact?teamReps:teamReps.filter(function(r){return !r.s;});
                     var tmYtdT=activeTReps.reduce(function(s,r){return s+ytdMonths.reduce(function(ss,m){return ss+((data[r.n]&&data[r.n][selAdj]&&data[r.n][selAdj][m])?data[r.n][selAdj][m].T:0);},0);},0);
                     var tmYtdA=activeTReps.reduce(function(s,r){return s+ytdMonths.reduce(function(ss,m){return ss+((data[r.n]&&data[r.n][selAdj]&&data[r.n][selAdj][m])?data[r.n][selAdj][m].A:0);},0);},0);
                     var tmAp=pct(tmYtdA,tmYtdT);
