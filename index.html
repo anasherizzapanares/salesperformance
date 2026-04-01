@@ -437,7 +437,9 @@ function App(){
               <div style={{position:"fixed",inset:0,background:"rgba(9,41,3,0.6)",zIndex:100,display:"flex",alignItems:"center",justifyContent:"center"}}>
                 <div style={{background:"#fff",borderRadius:12,padding:24,width:300,boxShadow:"0 8px 32px rgba(9,41,3,0.2)"}}>
                   <div style={{fontWeight:700,fontSize:15,marginBottom:4,color:"#092903"}}>{showEditRep}</div>
-                  <div style={{fontSize:12,color:"#4A7C59",marginBottom:16}}>Update rep status</div>
+                  <div style={{fontSize:12,color:"#4A7C59",marginBottom:8}}>Rename rep</div>
+<input defaultValue={showEditRep} onBlur={function(e){var newName=e.target.value.trim();if(newName&&newName!==showEditRep){var nr=reps.map(function(r){if(r.n!==showEditRep)return r;var c=Object.assign({},r);c.n=newName;return c;});setReps(nr);setData(function(p){var d=Object.assign({},p);d[newName]=p[showEditRep];delete d[showEditRep];save({data:d,reps:nr});return d;});setMeta(function(p){var m=Object.assign({},p);m[newName]=p[showEditRep];delete m[showEditRep];return m;});setAccel(function(p){var a=Object.assign({},p);a[newName]=p[showEditRep];delete a[showEditRep];return a;});setShowEditRep(null);}}} style={{width:"100%",padding:"8px 10px",borderRadius:6,border:"2px solid #A6EB93",fontSize:13,marginBottom:16,boxSizing:"border-box"}}/>
+<div style={{fontSize:12,color:"#4A7C59",marginBottom:16}}>Update rep status</div>
                   <div style={{display:"flex",flexDirection:"column",gap:8}}>
                     <button onClick={function(){updateRepStatus(showEditRep,"");}} style={{padding:"9px",borderRadius:6,border:"2px solid #32CE13",background:"#E9FAE5",color:"#092903",cursor:"pointer",fontSize:13,fontWeight:600}}>✅ Set as Active</button>
                     <button onClick={function(){updateRepStatus(showEditRep,"maternity");}} style={{padding:"9px",borderRadius:6,border:"2px solid #FF7F00",background:"#FFFAEC",color:"#FF7F00",cursor:"pointer",fontSize:13,fontWeight:600}}>🤱 Maternity Leave</button>
