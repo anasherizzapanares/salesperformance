@@ -91,7 +91,7 @@ var fmtK = function(n){ return n===0 ? "₱0" : "₱"+(n/1000).toFixed(0)+"K"; }
 var pct  = function(a,t){ return t===0 ? 0 : Math.round(a/t*10000)/100; };
 var aC   = function(p){ return p>=100?"#32CE13":p>=80?"#1679FA":p>=60?"#FF7F00":"#dc2626"; };
 var aBg  = function(p){ return p>=100?"#E9FAE5":p>=80?"#EEF7FF":p>=60?"#FFFAEC":"#fee2e2"; };
-const MONTHS = ['Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar'];
+var MONTHS = ['Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar'];
 function emptyRep() {
   var d = {};
   ADJ.forEach(function(a){ d[a]={}; MONTHS.forEach(function(m){ d[a][m]={T:0,A:0}; }); });
