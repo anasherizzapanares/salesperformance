@@ -12,21 +12,25 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
   const app = initializeApp({
-    apiKey:"AIzaSyBqKn5fFGBqSatc7A9-LV4VhhldEJi8dok",
-    authDomain:"sales-performance-1d7d1.firebaseapp.com",
-    projectId:"sales-performance-1d7d1"
+    apiKey: "AIzaSyCmj6CKzw_C6uIxlLj9DwDjKVwe88DEyFw",
+    authDomain: "sales-performance-1d7d1.firebaseapp.com",
+    projectId: "sales-performance-1d7d1",
+    storageBucket: "sales-performance-1d7d1.firebasestorage.app",
+    messagingSenderId: "985499387301",
+    appId: "1:985499387301:web:c75f3f7a9890dcc692544c"
   });
   const db = getFirestore(app);
-  window._db = db;
-  window._doc = doc;
-  window._setDoc = setDoc;
-  window._onSnapshot = onSnapshot;
-  window._firebaseReady = true;
-  window.dispatchEvent(new Event('firebaseReady'));
+  window.__db = db;
+  window.__setDoc = setDoc;
+  window.__doc = doc;
+  window.__onSnapshot = onSnapshot;
+  window.__firestoreReady = true;
+  window.dispatchEvent(new Event("firebaseReady"));
 </script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Rubik', sans-serif; background: #F7F9ED; color: #1a1a1a; }
+body { font-family: 'Rubik', sans-serif; font-size: 13px; background: #F7F9ED; }
+button:focus, input:focus, select:focus { outline: none; }
 </style>
 </head>
 <body>
@@ -34,88 +38,59 @@ body { font-family: 'Rubik', sans-serif; background: #F7F9ED; color: #1a1a1a; }
 <script type="text/babel">
 var useState = React.useState;
 var useEffect = React.useEffect;
+var useCallback = React.useCallback;
 var useMemo = React.useMemo;
-var useRef = React.useRef;
 
-var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-var FY_MONTHS = ['Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar'];
-var ADJ = ['MRR','E/F','One-time Fees','Implementation'];
-var EDIT_PASSWORD = 'sprout2026';
-
-var TEAMS = ['ENT Builders','ENT Hunters','SME Jetzsetters','SME Strikers','Channels','Upsell'];
-
-var INIT_REPS = [
-  {n:'Katryn Saldajeno',t:'ENT Builders'},
-  {n:'Miriam Pulido',t:'ENT Builders'},
-  {n:'Justin Bernabe',t:'ENT Builders',s:'resigned'},
-  {n:'TBH ENT Builders',t:'ENT Builders',s:'tbh'},
-  {n:'Lana Pineda',t:'ENT Hunters'},
-  {n:'Crystel Ambrosio',t:'ENT Hunters'},
-  {n:'Allyssa Atienza',t:'ENT Hunters',s:'resigned'},
-  {n:'Osheri Fima',t:'ENT Hunters'},
-  {n:'Ferdie Salvosa',t:'SME Jetzsetters'},
-  {n:'Reine Suarez',t:'SME Jetzsetters'},
-  {n:'Rona Pablo',t:'SME Jetzsetters'},
-  {n:'Jethro Jamelo',t:'SME Jetzsetters'},
-  {n:'Mat Galuego',t:'SME Strikers'},
-  {n:'Ric Rogodon',t:'SME Strikers'},
-  {n:'Rachelle Serneo',t:'SME Strikers',s:'maternity'},
-  {n:'Rizzalyn Berce',t:'SME Strikers'},
-  {n:'Herbert Salvaleon',t:'Channels',s:'resigned'},
-  {n:'TBH Channels',t:'Channels',s:'tbh'},
-  {n:'Thea Estrella',t:'Upsell',s:'resigned'},
-  {n:'TBH Upsell',t:'Upsell',s:'tbh'},
-  {n:'TBH Upsell 2',t:'Upsell',s:'tbh'}
-];
-
-var QUOTAS = {
-  'ENT Builders':  {MRR:{Jan:540000,Feb:540000,Mar:540000,Apr:900000,May:900000,Jun:900000,Jul:900000,Aug:900000,Sep:900000,Oct:720000,Nov:720000,Dec:540000}},
-  'ENT Hunters':   {MRR:{Jan:540000,Feb:540000,Mar:540000,Apr:900000,May:900000,Jun:900000,Jul:900000,Aug:900000,Sep:900000,Oct:720000,Nov:720000,Dec:540000}},
-  'SME Jetzsetters':{MRR:{Jan:310000,Feb:310000,Mar:310000,Apr:310000,May:310000,Jun:310000,Jul:310000,Aug:310000,Sep:310000,Oct:310000,Nov:310000,Dec:310000}},
-  'SME Strikers':  {MRR:{Jan:280000,Feb:280000,Mar:280000,Apr:280000,May:280000,Jun:280000,Jul:280000,Aug:280000,Sep:280000,Oct:280000,Nov:280000,Dec:280000}},
-  'Channels':      {MRR:{Jan:150000,Feb:150000,Mar:150000,Apr:150000,May:150000,Jun:150000,Jul:150000,Aug:150000,Sep:150000,Oct:150000,Nov:150000,Dec:150000}},
-  'Upsell':        {MRR:{Jan:380000,Feb:380000,Mar:380000,Apr:580000,May:580000,Jun:580000,Jul:580000,Aug:580000,Sep:580000,Oct:480000,Nov:480000,Dec:420000}}
+var EDIT_PASSWORD = "sprout2026";
+var ADJ = ["MRR","E/F","One-time Fees","Implementation"];
+var TEAMS = ["ENT Builders","ENT Hunters","SME Jetzsetters","SME Strikers","Channels","Upsell"];
+var TCOL = {"ENT Builders":"#092903","ENT Hunters":"#8139EE","SME Jetzsetters":"#1679FA","SME Strikers":"#FF7F00","Channels":"#239A0D","Upsell":"#dc2626"};
+var STCFG = {
+  resigned: {label:"Resigned", bg:"#fee2e2", color:"#dc2626"},
+  maternity: {label:"Maternity Leave", bg:"#FFF4D3", color:"#FF7F00"},
+  tbh: {label:"TBH", bg:"#EEE9FE", color:"#8139EE"}
+};
+var SEGMAP = {"ENT Builders":"ENT","ENT Hunters":"ENT","SME Jetzsetters":"SME J","SME Strikers":"SME O","Channels":"Channels","Upsell":"Upsell SME"};
+var TABS = ["📊 Segment","📋 Rep Summary","📥 Data Entry","🏆 Leaderboard","👥 Teams","⚡ Accelerator"];
+var SEGS = ["ENT","SME","US"];
+var SEGLABEL = {ENT:"ENT", SME:"SME", US:"U/S"};
+var SEGTGT = {
+  ENT: {
+    MRR: [540000,540000,540000,900000,900000,900000,900000,900000,900000,720000,720000,540000],
+    EmFin: [40000,40000,40000,40000,40000,40000,40000,40000,40000,40000,40000,40000]
+  },
+  SME: {
+    MRR: [540000,540000,540000,900000,900000,900000,900000,900000,900000,720000,720000,540000],
+    EmFin: [50000,50000,50000,50000,50000,50000,50000,50000,50000,50000,50000,50000]
+  },
+  US: {
+    MRR: [380000,380000,380000,580000,580000,580000,580000,580000,580000,480000,480000,420000],
+    EmFin: [150000,150000,150000,150000,150000,150000,150000,150000,150000,150000,150000,150000]
+  }
 };
 
-// Get current FY month index (Apr=0 ... Mar=11)
-function getCurrentFYMonth() {
-  var now = new Date();
-  var m = now.getMonth(); // 0=Jan
-  var fyIdx = (m - 3 + 12) % 12; // Apr=0
-  return FY_MONTHS[fyIdx];
-}
+var INIT_REPS = [
+  {n:"Katryn Saldajeno",t:"ENT Builders"},  {n:"Miriam Pulido",t:"ENT Builders"},
+  {n:"Justin Bernabe",t:"ENT Builders",s:"resigned"},{n:"TBH ENT Builders",t:"ENT Builders",s:"tbh"},
+  {n:"Lana Pineda",t:"ENT Hunters"},{n:"Crystel Ambrosio",t:"ENT Hunters"},
+  {n:"Allyssa Atienza",t:"ENT Hunters",s:"resigned"},{n:"TBH ENT Hunters",t:"ENT Hunters",s:"tbh"},
+  {n:"Ferdie Salvosa",t:"SME Jetzsetters"},{n:"Reine Suarez",t:"SME Jetzsetters"},
+  {n:"Rona Pablo",t:"SME Jetzsetters"},{n:"Jethro Jamelo",t:"SME Jetzsetters"},
+  {n:"Gel Riboroso",t:"SME Jetzsetters"},{n:"Nicco Tioseco",t:"SME Jetzsetters"},
+  {n:"Osheri Fima",t:"SME Strikers"},{n:"Riezhel Punzalan",t:"SME Strikers"},
+  {n:"Rizzalyn Berce",t:"SME Strikers"},{n:"Akisha Abella",t:"SME Strikers"},
+  {n:"Brian Azarcon",t:"SME Strikers"},{n:"Herbert Salvaleon",t:"SME Strikers",s:"resigned"},
+  {n:"Rachelle Serneo",t:"SME Strikers",s:"maternity"},{n:"Mat Galuego",t:"Channels"},
+  {n:"Ric Rogodon",t:"Upsell"},{n:"Chress Espineda",t:"Upsell"},
+  {n:"Kurt Ang",t:"Upsell"},{n:"Javier Lopez",t:"Upsell"},
+  {n:"Thea Estrella",t:"Upsell",s:"resigned"}
+];
 
-function fmt(n) {
-  if (n === null || n === undefined || isNaN(n)) return '—';
-  var abs = Math.abs(n);
-  var s = abs >= 1000000 ? (abs/1000000).toFixed(1)+'M' : abs >= 1000 ? Math.round(abs/1000)+'K' : String(abs);
-  return (n < 0 ? '-' : '') + '₱' + s;
-}
-function fmtK(n) {
-  if (!n && n !== 0) return '—';
-  return '₱' + (Math.abs(n)>=1000 ? Math.round(n/1000)+'K' : n);
-}
-function pct(a, b) { return b ? Math.round(a/b*1000)/10 : 0; }
-function aC(p) { return p>=100?'#32CE13':p>=80?'#1679FA':p>=60?'#FF7F00':'#dc2626'; }
-function aBg(p) { return p>=100?'#E9FAE5':p>=80?'#EEF7FF':p>=60?'#FFFAEC':'#fee2e2'; }
-
-function THS(ex) { return Object.assign({padding:'9px 10px',color:'#fff',background:'#092903',fontWeight:600},ex||{}); }
-function Chip(props) {
-  var p = props.p;
-  return React.createElement('span',{style:{display:'inline-block',padding:'2px 8px',borderRadius:20,fontSize:11,fontWeight:600,background:aBg(p),color:aC(p)}},p!==null&&p!==undefined&&!isNaN(p)?p.toFixed(1)+'%':'—');
-}
-function Badge(props) {
-  var s = props.s;
-  if (!s || s==='active') return null;
-  var labels = {resigned:'Resigned',maternity:'Mat. Leave',tbh:'TBH'};
-  var colors = {resigned:'#dc2626',maternity:'#7c3aed',tbh:'#6b7280'};
-  return React.createElement('span',{style:{fontSize:9,padding:'1px 5px',borderRadius:8,background:colors[s]||'#6b7280',color:'#fff',marginLeft:4,fontWeight:600,whiteSpace:'nowrap'}},labels[s]||s);
-}
-
-function rowBg(i, off) {
-  if (off) return '#f0f0f0';
-  return i%2===0?'#fff':'#F7F9ED';
-}
+var fmt  = function(n){ return n===0 ? "₱0" : "₱"+Number(n).toLocaleString(); };
+var fmtK = function(n){ return n===0 ? "₱0" : "₱"+(n/1000).toFixed(0)+"K"; };
+var pct  = function(a,t){ return t===0 ? 0 : Math.round(a/t*10000)/100; };
+var aC   = function(p){ return p>=100?"#32CE13":p>=80?"#1679FA":p>=60?"#FF7F00":"#dc2626"; };
+var aBg  = function(p){ return p>=100?"#E9FAE5":p>=80?"#EEF7FF":p>=60?"#FFFAEC":"#fee2e2"; };
 
 function emptyRep() {
   var d = {};
@@ -126,700 +101,642 @@ function emptyRep() {
 function buildData() {
   var d = {};
   INIT_REPS.forEach(function(r){ d[r.n]=emptyRep(); });
+  function s(n,mT,mA,eT,eA) {
+    if(!d[n]) return;
+    MONTHS.forEach(function(m,i){ d[n].MRR[m]={T:mT[i]||0,A:mA[i]||0}; d[n]["E/F"][m]={T:eT[i]||0,A:eA[i]||0}; });
+  }
+  s("Katryn Saldajeno",[80000,80000,100000,120000,120000,120000,120000,120000,120000,110000,110000,100000],[10000,426000,61000,0,0,0,0,0,0,0,0,0],[7500,7500,7500,7500,7500,7500,7500,7500,7500,7500,7500,7500],[1700,5000,5000,0,0,0,0,0,0,0,0,0]);
+  s("Miriam Pulido",[80000,80000,100000,120000,120000,120000,120000,120000,120000,110000,110000,100000],[17500,0,0,0,0,0,0,0,0,0,0,0],[7500,7500,7500,7500,7500,7500,7500,7500,7500,7500,7500,7500],[500,0,0,0,0,0,0,0,0,0,0,0]);
+  s("Justin Bernabe",[60000,60000,80000,0,0,0,0,0,0,0,0,0],[39000,0,0,0,0,0,0,0,0,0,0,0],[7500,7500,7500,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0]);
+  s("TBH ENT Builders",[0,0,0,0,110000,110000,110000,110000,90000,75000,75000,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,7500,7500,7500,7500,7500,7500,7500,0],[0,0,0,0,0,0,0,0,0,0,0,0]);
+  s("Lana Pineda",[80000,80000,100000,120000,120000,120000,120000,120000,120000,110000,110000,100000],[0,0,20000,0,0,0,0,0,0,0,0,0],[7500,7500,7500,7500,7500,7500,7500,7500,7500,7500,7500,7500],[0,0,2500,0,0,0,0,0,0,0,0,0]);
+  s("Crystel Ambrosio",[80000,80000,100000,120000,120000,120000,120000,120000,120000,110000,110000,100000],[190972,0,288550,0,0,0,0,0,0,0,0,0],[7500,7500,7500,7500,7500,7500,7500,7500,7500,7500,7500,7500],[25000,0,0,0,0,0,0,0,0,0,0,0]);
+  s("Allyssa Atienza",[80000,80000,100000,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[7500,7500,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0]);
+  s("TBH ENT Hunters",[0,0,0,0,0,110000,110000,110000,110000,90000,75000,75000],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,7500,7500,7500,7500,7500,7500,7500],[0,0,0,0,0,0,0,0,0,0,0,0]);
+  s("Ferdie Salvosa",[60000,60000,60000,100000,100000,100000,100000,100000,100000,75000,75000,75000],[73200,125000,75000,0,0,0,0,0,0,0,0,0],[5000,5000,5000,5000,5000,5000,5000,5000,5000,5000,5000,5000],[9600,14300,16500,0,0,0,0,0,0,0,0,0]);
+  s("Reine Suarez",[60000,60000,60000,100000,100000,100000,100000,100000,100000,75000,75000,75000],[64875,87650,50200,0,0,0,0,0,0,0,0,0],[5000,5000,5000,5000,5000,5000,5000,5000,5000,5000,5000,5000],[16250,14750,5000,0,0,0,0,0,0,0,0,0]);
+  s("Rona Pablo",[60000,60000,60000,100000,100000,100000,100000,100000,100000,75000,75000,75000],[53000,110500,27500,0,0,0,0,0,0,0,0,0],[5000,5000,5000,5000,5000,5000,5000,5000,5000,5000,5000,5000],[5000,22750,1750,0,0,0,0,0,0,0,0,0]);
+  s("Jethro Jamelo",[60000,60000,80000,110000,110000,110000,110000,110000,110000,90000,75000,75000],[88715,98350,40500,0,0,0,0,0,0,0,0,0],[5000,5000,5000,5000,5000,5000,5000,5000,5000,5000,5000,5000],[6750,6500,5450,0,0,0,0,0,0,0,0,0]);
+  s("Gel Riboroso",[60000,60000,60000,100000,100000,100000,100000,100000,100000,75000,75000,75000],[81500,60170,15000,0,0,0,0,0,0,0,0,0],[5000,5000,5000,5000,5000,5000,5000,5000,5000,5000,5000,5000],[12390,16050,700,0,0,0,0,0,0,0,0,0]);
+  s("Nicco Tioseco",[60000,60000,60000,100000,100000,100000,100000,100000,100000,75000,75000,75000],[22000,31000,52000,0,0,0,0,0,0,0,0,0],[5000,5000,5000,5000,5000,5000,5000,5000,5000,5000,5000,5000],[0,1150,4250,0,0,0,0,0,0,0,0,0]);
+  s("Osheri Fima",[80000,80000,100000,130000,130000,130000,130000,130000,130000,120000,120000,100000],[197050,91000,45000,0,0,0,0,0,0,0,0,0],[5000,5000,5000,5000,5000,5000,5000,5000,5000,5000,5000,5000],[4600,11900,7500,0,0,0,0,0,0,0,0,0]);
+  s("Riezhel Punzalan",[60000,60000,80000,110000,110000,110000,110000,110000,110000,90000,75000,75000],[12000,139800,0,0,0,0,0,0,0,0,0,0],[5000,5000,5000,5000,5000,5000,5000,5000,5000,5000,5000,5000],[0,12000,0,0,0,0,0,0,0,0,0,0]);
+  s("Rizzalyn Berce",[60000,60000,80000,110000,110000,110000,110000,110000,110000,90000,75000,75000],[105250,120210,12500,0,0,0,0,0,0,0,0,0],[5000,5000,5000,5000,5000,5000,5000,5000,5000,5000,5000,5000],[16750,16500,2150,0,0,0,0,0,0,0,0,0]);
+  s("Akisha Abella",[60000,60000,60000,100000,100000,100000,100000,100000,100000,75000,75000,75000],[75000,108000,29000,0,0,0,0,0,0,0,0,0],[5000,5000,5000,5000,5000,5000,5000,5000,5000,5000,5000,5000],[6500,8850,3500,0,0,0,0,0,0,0,0,0]);
+  s("Brian Azarcon",[60000,60000,60000,100000,100000,100000,100000,100000,100000,75000,75000,75000],[0,0,26000,0,0,0,0,0,0,0,0,0],[5000,5000,5000,5000,5000,5000,5000,5000,5000,5000,5000,5000],[0,0,0,0,0,0,0,0,0,0,0,0]);
+  s("Herbert Salvaleon",[60000,60000,0,0,0,0,0,0,0,0,0,0],[37250,0,0,0,0,0,0,0,0,0,0,0],[5000,5000,0,0,0,0,0,0,0,0,0,0],[6400,0,0,0,0,0,0,0,0,0,0,0]);
+  s("Rachelle Serneo",[60000,60000,0,0,100000,100000,100000,75000,75000,75000,0,0],[21000,51500,0,0,0,0,0,0,0,0,0,0],[5000,5000,0,0,5000,5000,5000,5000,5000,5000,0,0],[1750,3250,0,0,0,0,0,0,0,0,0,0]);
+  s("Mat Galuego",[60000,60000,80000,110000,110000,110000,110000,110000,110000,90000,75000,75000],[98300,60500,27833,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,100000,0],[0,9350,0,0,0,0,0,0,0,0,0,0]);
+  s("Ric Rogodon",[80000,80000,80000,120000,120000,120000,120000,120000,120000,100000,100000,100000],[347000,227785,45000,0,0,0,0,0,0,0,0,0],[30000,30000,30000,30000,30000,30000,30000,30000,30000,30000,30000,30000],[55900,29450,0,0,0,0,0,0,0,0,0,0]);
+  s("Chress Espineda",[60000,60000,80000,120000,120000,120000,120000,120000,120000,100000,100000,100000],[91796,74900,0,0,0,0,0,0,0,0,0,0],[20000,20000,20000,20000,20000,20000,20000,20000,20000,20000,20000,20000],[2300,17600,34350,0,0,0,0,0,0,0,0,0]);
+  s("Kurt Ang",[70000,70000,70000,110000,110000,110000,110000,110000,110000,90000,90000,90000],[91950,9740,0,0,0,0,0,0,0,0,0,0],[20000,20000,20000,20000,20000,20000,20000,20000,20000,20000,20000,20000],[22350,9550,11950,0,0,0,0,0,0,0,0,0]);
+  s("Javier Lopez",[80000,80000,80000,120000,120000,120000,120000,120000,120000,100000,100000,100000],[36415,73825,0,0,0,0,0,0,0,0,0,0],[30000,30000,30000,30000,30000,30000,30000,30000,30000,30000,30000,30000],[0,53300,63600,0,0,0,0,0,0,0,0,0]);
+  s("Thea Estrella",[70000,70000,70000,0,0,0,0,0,0,0,0,0],[4200,4636,0,0,0,0,0,0,0,0,0,0],[20000,20000,20000,0,0,0,0,0,0,0,0,0],[6500,13400,0,0,0,0,0,0,0,0,0,0]);
   return d;
 }
 
-function monA(repName, data) {
-  if (!data || !data[repName]) return 0;
-  var mrrData = data[repName]['MRR'];
-  if (!mrrData) return 0;
-  return MONTHS.reduce(function(s,m){ return s+(mrrData[m]?mrrData[m].A:0); },0);
+function buildMeta() {
+  var d = {};
+  INIT_REPS.forEach(function(r){ d[r.n]={fc:0,ef:false,mq:false,nl:0}; });
+  var seeds = {"Katryn Saldajeno":{fc:22000,ef:false,mq:true,nl:2},"Crystel Ambrosio":{fc:288280,ef:true,mq:true,nl:1},"Ferdie Salvosa":{fc:79500,ef:true,mq:true,nl:4},"Osheri Fima":{fc:101250,ef:true,mq:false,nl:2},"Rizzalyn Berce":{fc:57580,ef:false,mq:false,nl:1},"Akisha Abella":{fc:74000,ef:false,mq:false,nl:2},"Reine Suarez":{fc:68200,ef:true,mq:false,nl:3},"Rona Pablo":{fc:76370,ef:false,mq:false,nl:2},"Jethro Jamelo":{fc:85000,ef:true,mq:false,nl:2},"Mat Galuego":{fc:69500,ef:false,mq:false,nl:2},"Gel Riboroso":{fc:66500,ef:false,mq:false,nl:1},"Riezhel Punzalan":{fc:48200,ef:false,mq:false,nl:0},"Nicco Tioseco":{fc:94300,ef:false,mq:false,nl:3},"Brian Azarcon":{fc:0,ef:false,mq:false,nl:2},"Lana Pineda":{fc:97750,ef:false,mq:false,nl:1},"Miriam Pulido":{fc:486880,ef:false,mq:false,nl:0}};
+  Object.keys(seeds).forEach(function(k){ if(d[k]) d[k]=seeds[k]; });
+  return d;
 }
 
-function ytdA(repName, data, upToMonth) {
-  if (!data || !data[repName]) return 0;
-  var mrrData = data[repName]['MRR'];
-  if (!mrrData) return 0;
-  var idx = MONTHS.indexOf(upToMonth);
-  if (idx < 0) return 0;
-  return MONTHS.slice(0, idx+1).reduce(function(s,m){ return s+(mrrData[m]?mrrData[m].A:0); },0);
+function buildAccel() {
+  var d = {};
+  INIT_REPS.forEach(function(r){ d[r.n]={}; MONTHS.forEach(function(m){ d[r.n][m]=null; }); });
+  var hits = {"Mat Galuego":{Jan:true,Feb:true},"Crystel Ambrosio":{Feb:true},"Rona Pablo":{Jan:false,Feb:true},"Ferdie Salvosa":{Jan:true,Feb:true,Mar:true},"Jethro Jamelo":{Jan:true,Feb:true},"Reine Suarez":{Jan:true,Feb:true},"Gel Riboroso":{Jan:true,Feb:true},"Nicco Tioseco":{Jan:false,Feb:false},"Brian Azarcon":{Jan:false,Feb:false},"Osheri Fima":{Jan:false,Feb:true},"Akisha Abella":{Jan:true,Feb:true},"Rizzalyn Berce":{Jan:true,Feb:true},"Rachelle Serneo":{Jan:false,Feb:false},"Riezhel Punzalan":{Jan:false,Feb:true},"Chress Espineda":{Jan:false,Feb:false},"Kurt Ang":{Jan:true,Feb:false},"Thea Estrella":{Jan:false,Feb:false}};
+  Object.keys(hits).forEach(function(name){ if(d[name]){ var mo=hits[name]; Object.keys(mo).forEach(function(m){ d[name][m]=mo[m]; }); } });
+  return d;
 }
 
-function ytdT(repName, upToMonth) {
-  var rep = INIT_REPS.find(function(r){return r.n===repName;});
-  if (!rep) return 0;
-  var q = QUOTAS[rep.t];
-  if (!q||!q.MRR) return 0;
-  var idx = MONTHS.indexOf(upToMonth);
-  if (idx < 0) return 0;
-  return MONTHS.slice(0, idx+1).reduce(function(s,m){ return s+(q.MRR[m]||0); },0);
+function buildSegActuals() {
+  var d = {};
+  SEGS.forEach(function(seg){ d[seg]={MRR:{},EmFin:{}}; MONTHS.forEach(function(m){ d[seg].MRR[m]=0; d[seg].EmFin[m]=0; }); });
+  d.ENT.MRR  = {Jan:369522,Feb:470000,Mar:306883,Apr:0,May:0,Jun:0,Jul:0,Aug:0,Sep:0,Oct:0,Nov:0,Dec:0};
+  d.ENT.EmFin= {Jan:20000,Feb:17500,Mar:0,Apr:0,May:0,Jun:0,Jul:0,Aug:0,Sep:0,Oct:0,Nov:0,Dec:0};
+  d.SME.MRR  = {Jan:797090,Feb:1039680,Mar:463200,Apr:0,May:0,Jun:0,Jul:0,Aug:0,Sep:0,Oct:0,Nov:0,Dec:0};
+  d.SME.EmFin= {Jan:88990,Feb:122850,Mar:49300,Apr:0,May:0,Jun:0,Jul:0,Aug:0,Sep:0,Oct:0,Nov:0,Dec:0};
+  d.US.MRR   = {Jan:571361,Feb:390686,Mar:45000,Apr:0,May:0,Jun:0,Jul:0,Aug:0,Sep:0,Oct:0,Nov:0,Dec:0};
+  d.US.EmFin = {Jan:87050,Feb:123300,Mar:109900,Apr:0,May:0,Jun:0,Jul:0,Aug:0,Sep:0,Oct:0,Nov:0,Dec:0};
+  return d;
+}
+
+function Badge(props) {
+  if(!props.s || !STCFG[props.s]) return null;
+  var c = STCFG[props.s];
+  return React.createElement('span',{style:{fontSize:10,padding:"1px 7px",borderRadius:10,background:c.bg,color:c.color,fontWeight:600,whiteSpace:"nowrap",marginLeft:4}},c.label);
+}
+
+function Chip(props) {
+  return React.createElement('span',{style:{display:"inline-block",padding:"2px 10px",borderRadius:20,fontWeight:700,fontSize:12,background:aBg(props.p),color:aC(props.p)}},props.p.toFixed(1)+"%");
 }
 
 function App() {
-  var initMonth = getCurrentFYMonth();
-  var initMonthIdx = MONTHS.indexOf(initMonth);
+  var tabS=useState(0), dataS=useState(buildData), metaS=useState(buildMeta), accelS=useState(buildAccel), repsS=useState(INIT_REPS), segAS=useState(buildSegActuals);
+  var curMonS=useState("Mar"), selTeamS=useState("ENT Builders"), selAdjS=useState("MRR"), editIdS=useState(null);
+  var showInactS=useState(false), sortColS=useState(null), sortDirS=useState("desc"), showAddS=useState(false);
+  var newRepS=useState({name:"",team:"ENT Builders",status:""}), dbReadyS=useState(false), savingS=useState(false), lastSavedS=useState(null);
+  var showEditRepS=useState(null);
+  var unlockedS=useState(false);
+  var showLockModalS=useState(false);
+  var pwInputS=useState("");
 
-  var _s1 = useState('Segment'); var tab = _s1[0]; var setTab = _s1[1];
-  var _s2 = useState(false); var unlocked = _s2[0]; var setUnlocked = _s2[1];
-  var _s3 = useState(initMonth); var selMonth = _s3[0]; var setSelMonth = _s3[1];
-  var _s4 = useState(buildData()); var data = _s4[0]; var setData = _s4[1];
-  var _s5 = useState({}); var meta = _s5[0]; var setMeta = _s5[1];
-  var _s6 = useState({}); var segData = _s6[0]; var setSegData = _s6[1];
-  var _s7 = useState(false); var connected = _s7[0]; var setConnected = _s7[1];
-  var _s8 = useState(false); var showInact = _s8[0]; var setShowInact = _s8[1];
-  var _s9 = useState(null); var showEditRep = _s9[0]; var setShowEditRep = _s9[1];
-  var _s10 = useState(''); var pwInput = _s10[0]; var setPwInput = _s10[1];
-  var _s11 = useState(false); var showPw = _s11[0]; var setShowPw = _s11[1];
-  var _s12 = useState(false); var efToggle = _s12[0]; var setEfToggle = _s12[1];
-  var _s13 = useState(false); var mqToggle = _s13[0]; var setMqToggle = _s13[1];
-  var _s14 = useState('ytdA'); var sortCol = _s14[0]; var setSortCol = _s14[1];
-  var _s15 = useState('desc'); var sortDir = _s15[0]; var setSortDir = _s15[1];
-  var _s16 = useState(INIT_REPS); var reps = _s16[0]; var setReps = _s16[1];
+  var tab=tabS[0]; var setTab=tabS[1];
+  var data=dataS[0]; var setData=dataS[1];
+  var meta=metaS[0]; var setMeta=metaS[1];
+  var accel=accelS[0]; var setAccel=accelS[1];
+  var reps=repsS[0]; var setReps=repsS[1];
+  var segA=segAS[0]; var setSegA=segAS[1];
+  var curMon=curMonS[0]; var setCurMon=curMonS[1];
+  var selTeam=selTeamS[0]; var setSelTeam=selTeamS[1];
+  var selAdj=selAdjS[0]; var setSelAdj=selAdjS[1];
+  var editId=editIdS[0]; var setEditId=editIdS[1];
+  var showInact=showInactS[0]; var setShowInact=showInactS[1];
+  var sortCol=sortColS[0]; var setSortCol=sortColS[1];
+  var sortDir=sortDirS[0]; var setSortDir=sortDirS[1];
+  var showAdd=showAddS[0]; var setShowAdd=showAddS[1];
+  var newRep=newRepS[0]; var setNewRep=newRepS[1];
+  var dbReady=dbReadyS[0]; var setDbReady=dbReadyS[1];
+  var saving=savingS[0]; var setSaving=savingS[1];
+  var lastSaved=lastSavedS[0]; var setLastSaved=lastSavedS[1];
+  var showEditRep=showEditRepS[0]; var setShowEditRep=showEditRepS[1];
+  var unlocked=unlockedS[0]; var setUnlocked=unlockedS[1];
+  var showLockModal=showLockModalS[0]; var setShowLockModal=showLockModalS[1];
+  var pwInput=pwInputS[0]; var setPwInput=pwInputS[1];
 
-  var selMonthIdx = MONTHS.indexOf(selMonth);
+  var mi = MONTHS.indexOf(curMon);
 
   useEffect(function(){
-    function init() {
-      var db = window._db;
-      var docFn = window._doc;
-      var snap = window._onSnapshot;
-      if (!db||!docFn||!snap) return;
-      snap(docFn(db,'state','main'), function(d){
-        setConnected(true);
-        if (d.exists()) {
-          var s = d.data();
-          if (s.data) setData(s.data);
-          if (s.meta) setMeta(s.meta);
-          if (s.segData) setSegData(s.segData);
-          if (s.reps) setReps(s.reps);
-          // Only restore month if saved month is in the past or current, not future
-          if (s.selMonth) {
-            var savedIdx = MONTHS.indexOf(s.selMonth);
-            if (savedIdx <= initMonthIdx) setSelMonth(s.selMonth);
-          }
-        }
-      }, function(){ setConnected(false); });
-    }
-    if (window._firebaseReady) { init(); }
-    else { window.addEventListener('firebaseReady', init); }
-    return function(){ window.removeEventListener('firebaseReady', init); };
-  }, []);
+    if(window.__firestoreReady){ setDbReady(true); return; }
+    window.addEventListener("firebaseReady",function(){ setDbReady(true); },{once:true});
+  },[]);
 
-  function save(newData, newMeta, newSegData, newReps, newMonth) {
-    var db = window._db;
-    var docFn = window._doc;
-    var setDocFn = window._setDoc;
-    if (!db||!docFn||!setDocFn) return;
-    setDocFn(docFn(db,'state','main'),{
-      data: newData!==undefined?newData:data,
-      meta: newMeta!==undefined?newMeta:meta,
-      segData: newSegData!==undefined?newSegData:segData,
-      reps: newReps!==undefined?newReps:reps,
-      selMonth: newMonth!==undefined?newMonth:selMonth
+  useEffect(function(){
+    if(!dbReady) return;
+    var unsub = window.__onSnapshot(window.__doc(window.__db,"tracker","state"),function(snap){
+      if(snap.exists()){
+        var d=snap.data();
+        if(d.data) setData(d.data);
+        if(d.meta) setMeta(d.meta);
+        if(d.accel) setAccel(d.accel);
+        if(d.reps) setReps(d.reps);
+        if(d.segA) setSegA(d.segA);
+        if(d.curMon) setCurMon(d.curMon);
+      }
+    });
+    return function(){ unsub(); };
+  },[dbReady]);
+
+  var save = useCallback(function(obj){
+    if(!dbReady) return;
+    setSaving(true);
+    window.__setDoc(window.__doc(window.__db,"tracker","state"),obj,{merge:true}).then(function(){
+      setLastSaved(new Date().toLocaleTimeString()); setSaving(false);
+    }).catch(function(){ setSaving(false); });
+  },[dbReady]);
+
+  function ytdA(n){ return MONTHS.slice(0,mi+1).reduce(function(s,m){ return s+((data[n]&&data[n].MRR[m])?data[n].MRR[m].A:0); },0); }
+  function ytdT(n){ return MONTHS.slice(0,mi+1).reduce(function(s,m){ return s+((data[n]&&data[n].MRR[m])?data[n].MRR[m].T:0); },0); }
+  function monA(n){ return (data[n]&&data[n].MRR[curMon])?data[n].MRR[curMon].A:0; }
+
+  function repSum(n){
+    var r={};
+    ADJ.forEach(function(a){ var T=0,A=0; MONTHS.forEach(function(m){ T+=(data[n]&&data[n][a]&&data[n][a][m])?data[n][a][m].T:0; A+=(data[n]&&data[n][a]&&data[n][a][m])?data[n][a][m].A:0; }); r[a]={T:T,A:A,p:pct(A,T)}; });
+    var T=ADJ.reduce(function(s,a){ return s+r[a].T; },0), A=ADJ.reduce(function(s,a){ return s+r[a].A; },0);
+    r.all={T:T,A:A,p:pct(A,T)};
+    return r;
+  }
+
+  function setActual(rep,a,mon,val){
+    setData(function(p){
+      var nd=Object.assign({},p); nd[rep]=Object.assign({},p[rep]); nd[rep][a]=Object.assign({},p[rep][a]); nd[rep][a][mon]=Object.assign({},p[rep][a][mon],{A:Number(val)||0});
+      save({data:nd}); return nd;
     });
   }
+  function setMetaF(rep,field,val){
+    setMeta(function(p){ var nm=Object.assign({},p); nm[rep]=Object.assign({},p[rep]); nm[rep][field]=val; save({meta:nm}); return nm; });
+  }
+  function toggleAccel(rep,mon){
+    setAccel(function(p){ var cur=p[rep]?p[rep][mon]:null; var next=cur===null?true:cur===true?false:null; var na=Object.assign({},p); na[rep]=Object.assign({},p[rep]); na[rep][mon]=next; save({accel:na}); return na; });
+  }
+  function setSegActual(seg,adj,mon,val){
+    setSegA(function(p){ var ns=Object.assign({},p); ns[seg]=Object.assign({},p[seg]); ns[seg][adj]=Object.assign({},p[seg][adj]); ns[seg][adj][mon]=Number(val)||0; save({segA:ns}); return ns; });
+  }
+  function changeMonth(m){ setCurMon(m); save({curMon:m}); }
 
-  function setDataF(repName, adj, month, field, val) {
-    var nd = JSON.parse(JSON.stringify(data));
-    if (!nd[repName]) nd[repName]=emptyRep();
-    if (!nd[repName][adj]) nd[repName][adj]={};
-    if (!nd[repName][adj][month]) nd[repName][adj][month]={T:0,A:0};
-    nd[repName][adj][month][field]=val;
-    setData(nd); save(nd,undefined,undefined,undefined,undefined);
+  function addRep(){
+    if(!newRep.name.trim()) return;
+    var r={n:newRep.name.trim(),t:newRep.team}; if(newRep.status) r.s=newRep.status;
+    var nr=reps.concat([r]);
+    setReps(nr);
+    setData(function(p){ var d=Object.assign({},p); d[r.n]=emptyRep(); save({data:d,reps:nr}); return d; });
+    setMeta(function(p){ var m=Object.assign({},p); m[r.n]={fc:0,ef:false,mq:false,nl:0}; return m; });
+    setAccel(function(p){ var a=Object.assign({},p); a[r.n]={}; MONTHS.forEach(function(m){ a[r.n][m]=null; }); return a; });
+    setNewRep({name:"",team:"ENT Builders",status:""}); setShowAdd(false);
   }
 
-  function setMetaF(repName, field, val) {
-    var nm = JSON.parse(JSON.stringify(meta));
-    if (!nm[repName]) nm[repName]={};
-    nm[repName][field]=val;
-    setMeta(nm); save(undefined,nm,undefined,undefined,undefined);
+  function updateRepStatus(name, newStatus){
+    var nr=reps.map(function(r){ if(r.n!==name) return r; var copy=Object.assign({},r); if(newStatus){ copy.s=newStatus; } else { delete copy.s; } return copy; });
+    setReps(nr); save({reps:nr}); setShowEditRep(null);
   }
 
-  function setSegF(seg, adj, month, field, val) {
-    var ns = JSON.parse(JSON.stringify(segData));
-    if (!ns[seg]) ns[seg]={};
-    if (!ns[seg][adj]) ns[seg][adj]={};
-    if (!ns[seg][adj][month]) ns[seg][adj][month]={T:0,A:0};
-    ns[seg][adj][month][field]=val;
-    setSegData(ns); save(undefined,undefined,ns,undefined,undefined);
-  }
+  function togSort(col){ if(sortCol===col) setSortDir(function(d){ return d==="desc"?"asc":"desc"; }); else { setSortCol(col); setSortDir("desc"); } }
 
-  function setRepStatus(repName, status) {
-    var nr = reps.map(function(r){ return r.n===repName?Object.assign({},r,{s:status||undefined}):r; });
-    setReps(nr); save(undefined,undefined,undefined,nr,undefined);
-    setShowEditRep(null);
-  }
+  var activeReps=reps.filter(function(r){ return !r.s; });
+  var shownReps=showInact?reps:activeReps;
 
-  function handleMonthChange(m) {
-    setSelMonth(m); save(undefined,undefined,undefined,undefined,m);
-  }
-
-  function handleSort(col) {
-    if (sortCol===col) setSortDir(sortDir==='desc'?'asc':'desc');
-    else { setSortCol(col); setSortDir('desc'); }
-  }
-
-  var activeReps = reps.filter(function(r){return !r.s||r.s==='maternity';});
-  var shownReps = showInact ? reps : activeReps;
-
-  var totYtdT = activeReps.reduce(function(s,r){return s+ytdT(r.n,selMonth);},0);
-  var totYtdA = activeReps.reduce(function(s,r){return s+ytdA(r.n,data,selMonth);},0);
-  var totFc = activeReps.reduce(function(s,r){return s+(meta[r.n]?meta[r.n].fc:0);},0);
-  var totMonA = activeReps.reduce(function(s,r){return s+monA(r.n,data);},0);
-  var totNL = activeReps.reduce(function(s,r){return s+(meta[r.n]?(meta[r.n].nl||0):0);},0);
-
-  var sortedReps = useMemo(function(){
+  var sortedReps=useMemo(function(){
     return shownReps.slice().sort(function(a,b){
-      var av, bv;
-      if (sortCol==='ytdA') { av=ytdA(a.n,data,selMonth); bv=ytdA(b.n,data,selMonth); }
-      else if (sortCol==='ytdPct') { av=pct(ytdA(a.n,data,selMonth),ytdT(a.n,selMonth)); bv=pct(ytdA(b.n,data,selMonth),ytdT(b.n,selMonth)); }
-      else { av=0; bv=0; }
-      return sortDir==='desc'?bv-av:av-bv;
+      if(!sortCol) return 0;
+      var va=sortCol==="att"?pct(ytdA(a.n),ytdT(a.n)):ytdA(a.n);
+      var vb=sortCol==="att"?pct(ytdA(b.n),ytdT(b.n)):ytdA(b.n);
+      return sortDir==="desc"?vb-va:va-vb;
     });
-  },[shownReps,sortCol,sortDir,data,selMonth]);
+  },[shownReps,sortCol,sortDir,data,curMon]);
 
-  var H = '#092903';
-  var G = '#32CE13';
+  var lbReps=useMemo(function(){
+    return shownReps.map(function(r){ var s=repSum(r.n); s.n=r.n; s.t=r.t; s.s=r.s; s.ytdP=pct(ytdA(r.n),ytdT(r.n)); return s; }).sort(function(a,b){ return b.ytdP-a.ytdP; });
+  },[shownReps,data,curMon]);
 
-  function inputStyle(isReadOnly) {
-    return {width:80,padding:'3px 5px',fontSize:12,border:'1px solid #A6EB93',borderRadius:4,textAlign:'right',cursor:isReadOnly?'default':'text',background:isReadOnly?'#f5f5f5':'#fff'};
-  }
+  var totYtdT=activeReps.reduce(function(s,r){ return s+ytdT(r.n); },0);
+  var totYtdA=activeReps.reduce(function(s,r){ return s+ytdA(r.n); },0);
+  var totFc=activeReps.reduce(function(s,r){ return s+(meta[r.n]?meta[r.n].fc:0); },0);
+  var totMonA=activeReps.reduce(function(s,r){ return s+monA(r.n); },0);
+  var totNL=activeReps.reduce(function(s,r){ return s+(meta[r.n]?meta[r.n].nl:0); },0);
 
-  // ---- TABS ----
-  var tabs = ['Segment','Rep Summary','Data Entry','Leaderboard','Teams','Accelerator'];
-  var tabIcons = {'Segment':'📊','Rep Summary':'📋','Data Entry':'📝','Leaderboard':'🏆','Teams':'👥','Accelerator':'⚡'};
+  var THS = function(ex){ return Object.assign({padding:"9px 10px",color:"#fff",background:"#092903",fontWeight:600,fontSize:12},ex||{}); };
+  var TBLS = {borderCollapse:"collapse",width:"100%",background:"#fff",borderRadius:8,boxShadow:"0 1px 4px rgba(9,41,3,0.1)",fontSize:12};
+  var rowBg = function(i,off){ return off?"#FFFAEC":i%2===0?"#fff":"#F7F9ED"; };
 
-  function renderHeader() {
-    var activeCount = reps.filter(function(r){return !r.s||r.s==='maternity';}).length;
-    return React.createElement('div',{style:{background:H,color:'#fff',padding:'10px 16px',display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:8}},
-      React.createElement('div',{style:{display:'flex',alignItems:'center',gap:10}},
-        React.createElement('div',{style:{width:32,height:32,borderRadius:8,background:G,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:700,fontSize:16}},'S'),
-        React.createElement('div',null,
-          React.createElement('div',{style:{fontWeight:700,fontSize:16}},'FY26 Sales Performance Tracker'),
-          React.createElement('div',{style:{fontSize:11,opacity:0.8}},'Sprout Solutions • 6 Teams • '+activeCount+' Active Reps • ₱ PHP')
-        )
-      ),
-      React.createElement('div',{style:{display:'flex',alignItems:'center',gap:10,flexWrap:'wrap'}},
-        React.createElement('div',{style:{display:'flex',alignItems:'center',gap:5,fontSize:12}},
-          React.createElement('span',{style:{color:connected?G:'#f87171',fontSize:14}},connected?'✅':'❌'),
-          React.createElement('span',null,connected?'Connected':'Disconnected')
-        ),
-        unlocked
-          ? React.createElement('button',{onClick:function(){setUnlocked(false);},style:{background:'#32CE13',color:H,border:'none',borderRadius:6,padding:'5px 12px',fontWeight:600,cursor:'pointer',fontSize:12}},'🔓 Editing')
-          : React.createElement('button',{onClick:function(){setShowPw(true);},style:{background:'rgba(255,255,255,0.15)',color:'#fff',border:'1px solid rgba(255,255,255,0.3)',borderRadius:6,padding:'5px 12px',fontWeight:600,cursor:'pointer',fontSize:12}},'🔒 View Only'),
-        React.createElement('div',{style:{display:'flex',alignItems:'center',gap:6,fontSize:12}},
-          React.createElement('span',null,'Month:'),
-          React.createElement('select',{value:selMonth,onChange:function(e){handleMonthChange(e.target.value);},style:{background:'rgba(255,255,255,0.15)',color:'#fff',border:'1px solid rgba(255,255,255,0.3)',borderRadius:6,padding:'4px 8px',fontSize:12,cursor:'pointer'}},
-            MONTHS.map(function(m){ return React.createElement('option',{key:m,value:m,style:{color:'#000'}},m); })
-          )
-        )
-      )
-    );
-  }
+  return (
+    <div style={{fontFamily:"'Rubik',sans-serif",fontSize:13,background:"#F7F9ED",minHeight:"100vh"}}>
 
-  function renderTabs() {
-    return React.createElement('div',{style:{display:'flex',borderBottom:'2px solid #e5e7eb',background:'#fff',overflowX:'auto'}},
-      tabs.map(function(t){
-        var active = tab===t;
-        return React.createElement('button',{
-          key:t,
-          onClick:function(){setTab(t);},
-          style:{padding:'10px 14px',border:'none',borderBottom:active?'3px solid '+G:'3px solid transparent',background:'none',fontWeight:active?600:400,color:active?H:'#6b7280',cursor:'pointer',whiteSpace:'nowrap',fontSize:13,fontFamily:'Rubik,sans-serif'}
-        }, tabIcons[t]+' '+t);
-      })
-    );
-  }
+      {/* ── HEADER ── */}
+      <div style={{background:"#092903",color:"#fff",padding:"14px 20px",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:8}}>
+        <div style={{display:"flex",alignItems:"center",gap:12}}>
+          <div style={{width:34,height:34,background:"#32CE13",borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700,fontSize:18,color:"#092903"}}>S</div>
+          <div>
+            <div style={{fontWeight:700,fontSize:17}}>FY26 Sales Performance Tracker</div>
+            <div style={{fontSize:11,color:"#A6EB93",marginTop:1}}>Sprout Solutions · 6 Teams · {activeReps.length} Active Reps · ₱ PHP</div>
+          </div>
+        </div>
+        <div style={{display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}>
+          <span style={{fontSize:11,color:"#A6EB93"}}>{!dbReady?"⏳ Connecting...":saving?"💾 Saving...":lastSaved?"✅ Saved "+lastSaved:"✅ Connected"}</span>
+          <button onClick={function(){ if(unlocked){ setUnlocked(false); } else { setShowLockModal(true); setPwInput(""); } }} style={{padding:"5px 12px",borderRadius:6,border:"2px solid "+(unlocked?"#32CE13":"#4A7C59"),background:unlocked?"#32CE13":"transparent",color:unlocked?"#092903":"#A6EB93",fontSize:12,fontWeight:700,cursor:"pointer"}}>
+            {unlocked?"🔓 Edit Mode ON":"🔒 View Only"}
+          </button>
+          <div style={{display:"flex",alignItems:"center",gap:6}}>
+            <span style={{fontSize:12,color:"#A6EB93"}}>Month:</span>
+            <select value={curMon} onChange={function(e){changeMonth(e.target.value);}} style={{padding:"4px 10px",borderRadius:6,border:"2px solid #32CE13",fontSize:13,fontWeight:600,color:"#092903",background:"#fff"}}>
+              {MONTHS.map(function(m){ return <option key={m}>{m}</option>; })}
+            </select>
+          </div>
+        </div>
+      </div>
 
-  function renderPasswordModal() {
-    if (!showPw) return null;
-    return React.createElement('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,0.5)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:1000}},
-      React.createElement('div',{style:{background:'#fff',borderRadius:12,padding:24,width:300,boxShadow:'0 20px 60px rgba(0,0,0,0.3)'}},
-        React.createElement('div',{style:{fontWeight:700,fontSize:16,marginBottom:16,color:H}},'Enter Password'),
-        React.createElement('input',{type:'password',value:pwInput,onChange:function(e){setPwInput(e.target.value);},onKeyDown:function(e){if(e.key==='Enter'){if(pwInput===EDIT_PASSWORD){setUnlocked(true);setShowPw(false);setPwInput('');}else{alert('Wrong password');}}},placeholder:'Password',autoFocus:true,style:{width:'100%',padding:'8px 12px',border:'1px solid #d1d5db',borderRadius:6,fontSize:14,marginBottom:12}}),
-        React.createElement('div',{style:{display:'flex',gap:8}},
-          React.createElement('button',{onClick:function(){if(pwInput===EDIT_PASSWORD){setUnlocked(true);setShowPw(false);setPwInput('');}else{alert('Wrong password');}},style:{flex:1,background:H,color:'#fff',border:'none',borderRadius:6,padding:'8px',cursor:'pointer',fontWeight:600}},'Unlock'),
-          React.createElement('button',{onClick:function(){setShowPw(false);setPwInput('');},style:{flex:1,background:'#f3f4f6',color:'#374151',border:'none',borderRadius:6,padding:'8px',cursor:'pointer',fontWeight:600}},'Cancel')
-        )
-      )
-    );
-  }
+      {/* ── PASSWORD MODAL ── */}
+      {showLockModal&&(
+        <div style={{position:"fixed",inset:0,background:"rgba(9,41,3,0.7)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center"}}>
+          <div style={{background:"#fff",borderRadius:12,padding:28,width:300,boxShadow:"0 8px 32px rgba(9,41,3,0.3)"}}>
+            <div style={{fontWeight:700,fontSize:16,marginBottom:6,color:"#092903"}}>🔒 Enter Edit Password</div>
+            <div style={{fontSize:12,color:"#4A7C59",marginBottom:16}}>Enter the password to enable editing</div>
+            <input type="password" value={pwInput} onChange={function(e){setPwInput(e.target.value);}} onKeyDown={function(e){if(e.key==="Enter"){if(pwInput===EDIT_PASSWORD){setUnlocked(true);setShowLockModal(false);}else{alert("Incorrect password");}setPwInput("");} }} placeholder="Password" autoFocus style={{width:"100%",padding:"9px 12px",borderRadius:6,border:"2px solid #A6EB93",fontSize:14,marginBottom:16,boxSizing:"border-box"}}/>
+            <div style={{display:"flex",gap:8,justifyContent:"flex-end"}}>
+              <button onClick={function(){setShowLockModal(false);setPwInput("");}} style={{padding:"8px 16px",borderRadius:6,border:"1px solid #A6EB93",background:"#fff",cursor:"pointer",fontSize:13,color:"#4A7C59"}}>Cancel</button>
+              <button onClick={function(){ if(pwInput===EDIT_PASSWORD){setUnlocked(true);setShowLockModal(false);}else{alert("Incorrect password");} setPwInput(""); }} style={{padding:"8px 16px",borderRadius:6,border:"none",background:"#32CE13",color:"#092903",cursor:"pointer",fontSize:13,fontWeight:700}}>Unlock</button>
+            </div>
+          </div>
+        </div>
+      )}
 
-  function renderRepEditModal() {
-    if (!showEditRep) return null;
-    var rep = reps.find(function(r){return r.n===showEditRep;});
-    if (!rep) return null;
-    var statuses = [{v:'',label:'Active'},{v:'maternity',label:'Maternity Leave'},{v:'resigned',label:'Resigned'},{v:'tbh',label:'TBH'}];
-    return React.createElement('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,0.5)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:1000}},
-      React.createElement('div',{style:{background:'#fff',borderRadius:12,padding:24,width:320,boxShadow:'0 20px 60px rgba(0,0,0,0.3)'}},
-        React.createElement('div',{style:{fontWeight:700,fontSize:16,marginBottom:4,color:H}},rep.n),
-        React.createElement('div',{style:{fontSize:12,color:'#6b7280',marginBottom:16}},rep.t),
-        React.createElement('div',{style:{fontWeight:600,fontSize:13,marginBottom:8}},'Status'),
-        statuses.map(function(s){
-          return React.createElement('label',{key:s.v,style:{display:'flex',alignItems:'center',gap:8,padding:'8px',borderRadius:6,cursor:'pointer',background:rep.s===(s.v||undefined)?'#F7F9ED':'transparent',marginBottom:4}},
-            React.createElement('input',{type:'radio',name:'status',checked:(rep.s||'')===(s.v),onChange:function(){setRepStatus(rep.n,s.v||undefined);},style:{accentColor:G}}),
-            React.createElement('span',{style:{fontSize:13}},s.label)
-          );
-        }),
-        React.createElement('button',{onClick:function(){setShowEditRep(null);},style:{width:'100%',marginTop:12,background:'#f3f4f6',color:'#374151',border:'none',borderRadius:6,padding:'8px',cursor:'pointer',fontWeight:600}},'Close')
-      )
-    );
-  }
+      {/* ── TABS ── */}
+      <div style={{display:"flex",background:"#fff",borderBottom:"2px solid #E1F6C8",paddingLeft:12,overflowX:"auto"}}>
+        {TABS.map(function(t,i){ return <button key={i} onClick={function(){setTab(i);}} style={{padding:"10px 16px",border:"none",background:"none",cursor:"pointer",whiteSpace:"nowrap",fontWeight:tab===i?700:400,color:tab===i?"#32CE13":"#4A7C59",borderBottom:tab===i?"3px solid #32CE13":"3px solid transparent",fontSize:13}}>{t}</button>; })}
+      </div>
 
-  // ---- SEGMENT TAB ----
-  function renderSegment() {
-    var segs = [
-      {k:'ENT',label:'ENT',teams:['ENT Builders','ENT Hunters'],color:'#1679FA'},
-      {k:'SME',label:'SME',teams:['SME Jetzsetters','SME Strikers'],color:'#FF7F00'},
-      {k:'US',label:'U/S',teams:['Upsell'],color:'#32CE13'}
-    ];
-    var adjList = ['MRR','E/F'];
-    var months = MONTHS;
-    var ytdMonths = months.slice(0, selMonthIdx+1);
+      <div style={{padding:16}}>
 
-    function segRepYtdA(seg, adj) {
-      var teams = segs.find(function(s){return s.k===seg;}).teams;
-      var repNames = INIT_REPS.filter(function(r){return teams.indexOf(r.t)>=0 && (!r.s||r.s==='maternity');}).map(function(r){return r.n;});
-      if (adj==='MRR') {
-        return repNames.reduce(function(s,n){
-          return s+ytdMonths.reduce(function(ss,m){
-            return ss+(data[n]&&data[n]['MRR']&&data[n]['MRR'][m]?data[n]['MRR'][m].A:0);
-          },0);
-        },0);
-      }
-      return ytdMonths.reduce(function(s,m){
-        return s+(segData[seg]&&segData[seg][adj]&&segData[seg][adj][m]?segData[seg][adj][m].A:0);
-      },0);
-    }
+        {/* ── TAB 0: SEGMENT SUMMARY ── */}
+        {tab===0&&(
+          <div>
+            <b style={{color:"#092903",fontSize:15,display:"block",marginBottom:14}}>📊 Segment Summary</b>
+            {["MRR","EmFin"].map(function(adj){
+              var label=adj==="EmFin"?"E/F":"MRR";
+              return <div key={adj} style={{marginBottom:28}}>
+                <div style={{fontWeight:700,fontSize:11,color:"#4A7C59",marginBottom:8,textTransform:"uppercase",letterSpacing:1}}>{label}</div>
+                <div style={{overflowX:"auto"}}>
+                  <table style={TBLS}>
+                    <thead><tr style={{background:"#092903",color:"#fff"}}>
+                      <th style={{padding:"9px 12px",textAlign:"left",minWidth:90}}>Segment</th>
+                      <th style={{padding:"9px 8px",textAlign:"center",width:60}}>Row</th>
+                      {MONTHS.map(function(m){ return <th key={m} style={{padding:"9px 6px",textAlign:"right",minWidth:75}}>{m}</th>; })}
+                      <th style={{padding:"9px 10px",textAlign:"right",minWidth:95}}>Total</th>
+                      <th style={{padding:"9px 10px",textAlign:"right",minWidth:95}}>YTD</th>
+                      <th style={{padding:"9px 10px",textAlign:"center",minWidth:75}}>Ach%</th>
+                    </tr></thead>
+                    <tbody>
+                      {SEGS.concat(["Sales"]).map(function(seg,si){
+                        var isG=seg==="Sales";
+                        var tgts=isG?MONTHS.map(function(_,i){ return SEGS.reduce(function(s,sg){ return s+(SEGTGT[sg][adj][i]||0); },0); }):SEGTGT[seg][adj];
+                        var totT=tgts.reduce(function(s,v){ return s+v; },0);
+                        var totA=isG?SEGS.reduce(function(s,sg){ return s+MONTHS.reduce(function(ss,m){ return ss+(segA[sg]?segA[sg][adj][m]||0:0); },0); },0):MONTHS.reduce(function(s,m){ return s+(segA[seg]?segA[seg][adj][m]||0:0); },0);
+                        var yT=MONTHS.slice(0,mi+1).reduce(function(s,m,i){ return s+(tgts[i]||0); },0);
+                        var yA=isG?SEGS.reduce(function(s,sg){ return s+MONTHS.slice(0,mi+1).reduce(function(ss,m){ return ss+(segA[sg]?segA[sg][adj][m]||0:0); },0); },0):MONTHS.slice(0,mi+1).reduce(function(s,m){ return s+(segA[seg]?segA[seg][adj][m]||0:0); },0);
+                        var ap=pct(yA,yT);
+                        var bg=isG?"#E9FAE5":si%2===0?"#fff":"#F7F9ED";
+                        return [
+                          <tr key={seg+"T"} style={{background:bg}}>
+                            <td style={{padding:"6px 12px",fontWeight:700,color:isG?"#32CE13":"#092903",borderTop:"2px solid #E1F6C8"}} rowSpan={3}>{isG?"Sales (Total)":(SEGLABEL[seg]||seg)}</td>
+                            <td style={{padding:"6px 8px",color:"#4A7C59",fontSize:11,borderTop:"2px solid #E1F6C8"}}>Target</td>
+                            {MONTHS.map(function(m,i){ return <td key={m} style={{padding:"6px 6px",textAlign:"right",borderTop:"2px solid #E1F6C8",color:"#092903"}}>{fmt(tgts[i]||0)}</td>; })}
+                            <td style={{padding:"6px 10px",textAlign:"right",fontWeight:600,borderTop:"2px solid #E1F6C8",color:"#092903"}}>{fmt(totT)}</td>
+                            <td style={{padding:"6px 10px",textAlign:"right",fontWeight:600,borderTop:"2px solid #E1F6C8",color:"#092903"}}>{fmt(yT)}</td>
+                            <td rowSpan={3} style={{padding:"6px 10px",textAlign:"center",fontWeight:700,fontSize:14,borderTop:"2px solid #E1F6C8",color:aC(ap),background:aBg(ap)}}>{ap.toFixed(1)+"%"}</td>
+                          </tr>,
+                          <tr key={seg+"A"} style={{background:isG?"#C9F3BE":si%2===0?"#E9FAE5":"#F0F9B3"}}>
+                            <td style={{padding:"6px 8px",color:"#239A0D",fontSize:11,fontWeight:600}}>Actual</td>
+                            {MONTHS.map(function(m){
+                              if(isG) return <td key={m} style={{padding:"6px 6px",textAlign:"right",color:"#239A0D",fontWeight:600}}>{fmt(SEGS.reduce(function(s,sg){ return s+(segA[sg]?segA[sg][adj][m]||0:0); },0))}</td>;
+                              var cid="seg-"+seg+"-"+adj+"-"+m;
+                              var val=segA[seg]?segA[seg][adj][m]||0:0;
+                              return <td key={m} style={{padding:"3px 3px",textAlign:"right"}}>
+                                {editId===cid&&unlocked?
+                                  <input autoFocus type="number" defaultValue={val} onBlur={function(e){ setSegActual(seg,adj,m,e.target.value); setEditId(null); }} onKeyDown={function(e){ if(e.key==="Enter"){ setSegActual(seg,adj,m,e.target.value); setEditId(null); }}} style={{width:68,padding:"2px 4px",fontSize:11,border:"2px solid #32CE13",borderRadius:3,textAlign:"right"}}/>
+                                  :<span onClick={function(){ if(unlocked) setEditId(cid); }} style={{cursor:unlocked?"pointer":"default",display:"block",padding:"3px 5px",borderRadius:3,color:val>0?"#239A0D":"#94a3b8",background:val>0?"#C9F3BE":"transparent"}}>{fmt(val)}</span>}
+                              </td>;
+                            })}
+                            <td style={{padding:"6px 10px",textAlign:"right",fontWeight:600,color:"#239A0D"}}>{fmt(totA)}</td>
+                            <td style={{padding:"6px 10px",textAlign:"right",fontWeight:600,color:"#239A0D"}}>{fmt(yA)}</td>
+                          </tr>,
+                          <tr key={seg+"P"} style={{background:bg}}>
+                            <td style={{padding:"4px 8px",color:"#4A7C59",fontSize:11}}>Ach%</td>
+                            {MONTHS.map(function(m,i){
+                              var T=tgts[i]||0;
+                              var A=isG?SEGS.reduce(function(s,sg){ return s+(segA[sg]?segA[sg][adj][m]||0:0); },0):(segA[seg]?segA[seg][adj][m]||0:0);
+                              var p=pct(A,T);
+                              return <td key={m} style={{padding:"4px 6px",textAlign:"right",fontSize:11,fontWeight:600,color:T>0?aC(p):"#94a3b8"}}>{T>0?p.toFixed(1)+"%":"—"}</td>;
+                            })}
+                            <td style={{padding:"4px 10px",textAlign:"right",fontSize:11,fontWeight:600,color:aC(pct(totA,totT))}}>{pct(totA,totT).toFixed(1)+"%"}</td>
+                            <td style={{padding:"4px 10px",textAlign:"right",fontSize:11,fontWeight:600,color:aC(ap)}}>{ap.toFixed(1)+"%"}</td>
+                          </tr>
+                        ];
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>;
+            })}
+          </div>
+        )}
 
-    function segYtdT(seg, adj) {
-      if (adj!=='MRR') return 0;
-      var teams = segs.find(function(s){return s.k===seg;}).teams;
-      return teams.reduce(function(s,t){
-        var q = QUOTAS[t];
-        if (!q||!q.MRR) return s;
-        return s+ytdMonths.reduce(function(ss,m){return ss+(q.MRR[m]||0);},0);
-      },0);
-    }
+        {/* ── TAB 1: REP SUMMARY ── */}
+        {tab===1&&(
+          <div>
+            {/* Add Rep Modal */}
+            {showAdd&&(
+              <div style={{position:"fixed",inset:0,background:"rgba(9,41,3,0.6)",zIndex:100,display:"flex",alignItems:"center",justifyContent:"center"}}>
+                <div style={{background:"#fff",borderRadius:12,padding:24,width:320,boxShadow:"0 8px 32px rgba(9,41,3,0.2)"}}>
+                  <div style={{fontWeight:700,fontSize:15,marginBottom:16,color:"#092903"}}>➕ Add New Rep</div>
+                  <label style={{fontSize:12,color:"#4A7C59",display:"block",marginBottom:4}}>Full Name</label>
+                  <input value={newRep.name} onChange={function(e){ setNewRep(function(p){ return Object.assign({},p,{name:e.target.value}); }); }} placeholder="e.g. Juan dela Cruz" style={{width:"100%",padding:"8px 10px",borderRadius:6,border:"1px solid #A6EB93",fontSize:13,marginBottom:12,boxSizing:"border-box"}}/>
+                  <label style={{fontSize:12,color:"#4A7C59",display:"block",marginBottom:4}}>Team</label>
+                  <select value={newRep.team} onChange={function(e){ setNewRep(function(p){ return Object.assign({},p,{team:e.target.value}); }); }} style={{width:"100%",padding:"8px 10px",borderRadius:6,border:"1px solid #A6EB93",fontSize:13,marginBottom:12,boxSizing:"border-box"}}>{TEAMS.map(function(t){ return <option key={t}>{t}</option>; })}</select>
+                  <label style={{fontSize:12,color:"#4A7C59",display:"block",marginBottom:4}}>Status</label>
+                  <select value={newRep.status} onChange={function(e){ setNewRep(function(p){ return Object.assign({},p,{status:e.target.value}); }); }} style={{width:"100%",padding:"8px 10px",borderRadius:6,border:"1px solid #A6EB93",fontSize:13,marginBottom:20,boxSizing:"border-box"}}><option value="">Active</option><option value="resigned">Resigned</option><option value="maternity">Maternity Leave</option><option value="tbh">TBH</option></select>
+                  <div style={{display:"flex",gap:8,justifyContent:"flex-end"}}>
+                    <button onClick={function(){ setShowAdd(false); }} style={{padding:"8px 16px",borderRadius:6,border:"1px solid #A6EB93",background:"#fff",cursor:"pointer",fontSize:13,color:"#4A7C59"}}>Cancel</button>
+                    <button onClick={addRep} style={{padding:"8px 16px",borderRadius:6,border:"none",background:"#32CE13",color:"#092903",cursor:"pointer",fontSize:13,fontWeight:700}}>Add Rep</button>
+                  </div>
+                </div>
+              </div>
+            )}
 
-    function segMonVal(seg, adj, month, field) {
-      if (adj==='MRR' && field==='A') {
-        var teams = segs.find(function(s){return s.k===seg;}).teams;
-        var repNames = INIT_REPS.filter(function(r){return teams.indexOf(r.t)>=0&&(!r.s||r.s==='maternity');}).map(function(r){return r.n;});
-        return repNames.reduce(function(s,n){return s+(data[n]&&data[n]['MRR']&&data[n]['MRR'][month]?data[n]['MRR'][month].A:0);},0);
-      }
-      if (adj==='MRR' && field==='T') {
-        var teams2 = segs.find(function(s){return s.k===seg;}).teams;
-        return teams2.reduce(function(s,t){var q=QUOTAS[t];return s+(q&&q.MRR&&q.MRR[month]?q.MRR[month]:0);},0);
-      }
-      return segData[seg]&&segData[seg][adj]&&segData[seg][adj][month]?segData[seg][adj][month][field]||0:0;
-    }
+            {/* Edit Rep Status Modal */}
+            {showEditRep&&(
+              <div style={{position:"fixed",inset:0,background:"rgba(9,41,3,0.6)",zIndex:100,display:"flex",alignItems:"center",justifyContent:"center"}}>
+                <div style={{background:"#fff",borderRadius:12,padding:24,width:300,boxShadow:"0 8px 32px rgba(9,41,3,0.2)"}}>
+                  <div style={{fontWeight:700,fontSize:15,marginBottom:4,color:"#092903"}}>{showEditRep}</div>
+                  <div style={{fontSize:12,color:"#4A7C59",marginBottom:16}}>Update rep status</div>
+                  <div style={{display:"flex",flexDirection:"column",gap:8}}>
+                    <button onClick={function(){ updateRepStatus(showEditRep,""); }} style={{padding:"9px",borderRadius:6,border:"2px solid #32CE13",background:"#E9FAE5",color:"#092903",cursor:"pointer",fontSize:13,fontWeight:600}}>✅ Set as Active</button>
+                    <button onClick={function(){ updateRepStatus(showEditRep,"maternity"); }} style={{padding:"9px",borderRadius:6,border:"2px solid #FF7F00",background:"#FFFAEC",color:"#FF7F00",cursor:"pointer",fontSize:13,fontWeight:600}}>🤱 Maternity Leave</button>
+                    <button onClick={function(){ updateRepStatus(showEditRep,"resigned"); }} style={{padding:"9px",borderRadius:6,border:"2px solid #dc2626",background:"#fee2e2",color:"#dc2626",cursor:"pointer",fontSize:13,fontWeight:600}}>🚪 Resigned</button>
+                    <button onClick={function(){ setShowEditRep(null); }} style={{padding:"9px",borderRadius:6,border:"1px solid #A6EB93",background:"#fff",color:"#4A7C59",cursor:"pointer",fontSize:13}}>Cancel</button>
+                  </div>
+                </div>
+              </div>
+            )}
 
-    var totals = {ytdT:0,ytdA:0};
-    segs.forEach(function(sg){totals.ytdT+=segYtdT(sg.k,'MRR');totals.ytdA+=segRepYtdA(sg.k,'MRR');});
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12,flexWrap:"wrap",gap:8}}>
+              <b style={{color:"#092903",fontSize:15}}>📋 Rep Summary — {curMon}</b>
+              <div style={{display:"flex",gap:10,alignItems:"center",flexWrap:"wrap"}}>
+                <div style={{display:"flex",gap:8,fontSize:11}}>{[["#32CE13","≥100%"],["#1679FA","80–99%"],["#FF7F00","60–79%"],["#dc2626","<60%"]].map(function(x){ return <span key={x[1]} style={{display:"flex",alignItems:"center",gap:3}}><span style={{width:8,height:8,borderRadius:"50%",background:x[0],display:"inline-block"}}/><span style={{color:"#4A7C59"}}>{x[1]}</span></span>; })}</div>
+                <label style={{display:"flex",alignItems:"center",gap:5,fontSize:12,color:"#4A7C59",cursor:"pointer"}}><input type="checkbox" checked={showInact} onChange={function(e){ setShowInact(e.target.checked); }}/> Show inactive</label>
+                {unlocked&&<button onClick={function(){ setShowAdd(true); }} style={{padding:"6px 14px",background:"#32CE13",color:"#092903",border:"none",borderRadius:6,fontSize:12,fontWeight:700,cursor:"pointer"}}>+ Add Rep</button>}
+              </div>
+            </div>
 
-    return React.createElement('div',{style:{padding:'16px',overflowX:'auto'}},
-      React.createElement('h2',{style:{fontSize:16,fontWeight:700,marginBottom:16,color:H}},'📊 Segment Summary – YTD Jan–'+selMonth),
-      adjList.map(function(adj){
-        return React.createElement('div',{key:adj,style:{marginBottom:24}},
-          React.createElement('div',{style:{fontWeight:700,fontSize:13,color:H,marginBottom:8,padding:'4px 0',borderBottom:'2px solid #32CE13'}},adj),
-          React.createElement('div',{style:{overflowX:'auto'}},
-            React.createElement('table',{style:{width:'100%',borderCollapse:'collapse',fontSize:12}},
-              React.createElement('thead',null,
-                React.createElement('tr',null,
-                  React.createElement('th',{style:THS({textAlign:'left',width:'8%'})},'Segment'),
-                  React.createElement('th',{style:THS({textAlign:'center',width:'4%'})},'Row'),
-                  months.map(function(m){
-                    var isFuture = MONTHS.indexOf(m)>selMonthIdx;
-                    return React.createElement('th',{key:m,style:THS({textAlign:'center',width:'6%',opacity:isFuture?0.5:1})},m);
-                  }),
-                  React.createElement('th',{style:THS({textAlign:'right',width:'8%'})},'YTD Target'),
-                  React.createElement('th',{style:THS({textAlign:'right',width:'8%'})},'YTD Actual'),
-                  React.createElement('th',{style:THS({textAlign:'right',width:'6%'})},'YTD Ach%')
-                )
-              ),
-              React.createElement('tbody',null,
-                segs.map(function(sg,si){
-                  var sYtdT = adj==='MRR'?segYtdT(sg.k,adj):0;
-                  var sYtdA = segRepYtdA(sg.k,adj);
-                  var sPct = adj==='MRR'?pct(sYtdA,sYtdT):null;
-                  var bg = si%2===0?'#fff':'#F7F9ED';
+            <div style={{overflowX:"auto"}}>
+              <table style={TBLS}>
+                <thead>
+                  <tr style={{background:"#092903",color:"#fff"}}>
+                    <th style={THS({textAlign:"left",width:"18%",position:"sticky",left:0})}>Rep</th>
+                    <th style={THS({textAlign:"left",width:"13%"})}>Team</th>
+                    <th style={THS({textAlign:"right",width:"8%"})}>YTD Quota</th>
+                    <th onClick={function(){togSort("won");}} style={THS({textAlign:"right",width:"8%",cursor:"pointer",background:sortCol==="won"?"#239A0D":"#092903"})}>YTD Won {sortCol==="won"?(sortDir==="desc"?"▼":"▲"):"▾"}</th>
+                    <th onClick={function(){togSort("att");}} style={THS({textAlign:"center",width:"8%",cursor:"pointer",background:sortCol==="att"?"#239A0D":"#092903"})}>YTD Att% {sortCol==="att"?(sortDir==="desc"?"▼":"▲"):"▾"}</th>
+                    <th style={THS({textAlign:"right",width:"8%"})}>To Go</th>
+                    <th style={THS({textAlign:"right",width:"9%"})}>{curMon} Forecast</th>
+                    <th style={THS({textAlign:"right",width:"8%"})}>{curMon} Actual</th>
+                    <th style={THS({textAlign:"right",width:"8%"})}>Fcst To Go</th>
+                    <th style={THS({textAlign:"center",width:"7%"})}>Fcst Acc%</th>
+                    <th style={THS({textAlign:"center",width:"5%"})}>E/F</th>
+                    <th style={THS({textAlign:"center",width:"6%"})}>Logos</th>
+                    <th style={THS({textAlign:"center",width:"5%"})}>M/Q</th>
+                  </tr>
+                  <tr style={{background:"#239A0D",color:"#fff",fontWeight:700}}>
+                    <td style={{padding:"6px 10px",position:"sticky",left:0,background:"#239A0D",color:"#fff",fontWeight:700}}>TOTAL</td><td/>
+                    <td style={{padding:"6px 10px",textAlign:"right"}}>{fmtK(totYtdT)}</td>
+                    <td style={{padding:"6px 10px",textAlign:"right"}}>{fmtK(totYtdA)}</td>
+                    <td style={{padding:"6px 10px",textAlign:"center"}}><Chip p={pct(totYtdA,totYtdT)}/></td>
+                    <td style={{padding:"6px 10px",textAlign:"right",color:totYtdA>=totYtdT?"#D2F612":"#fca5a5"}}>{fmt(totYtdA-totYtdT)}</td>
+                    <td style={{padding:"6px 10px",textAlign:"right"}}>{fmtK(totFc)}</td>
+                    <td style={{padding:"6px 10px",textAlign:"right"}}>{fmtK(totMonA)}</td>
+                    <td style={{padding:"6px 10px",textAlign:"right",color:totMonA>=totFc?"#D2F612":"#fca5a5"}}>{fmt(totMonA-totFc)}</td>
+                    <td style={{padding:"6px 10px",textAlign:"center"}}>{totFc>0?pct(totMonA,totFc).toFixed(0)+"%":"—"}</td>
+                    <td/>                    <td style={{padding:"6px 10px",textAlign:"center"}}>{totNL>0?totNL:0}</td><td/>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sortedReps.map(function(r,i){
+                    var yA=ytdA(r.n),yT=ytdT(r.n),yP=pct(yA,yT),togo=yA-yT,fc=meta[r.n]?meta[r.n].fc:0,mA=monA(r.n),fToGo=mA-fc,fAcc=fc>0?pct(mA,fc):null;
+                    var off=!!r.s, bg=rowBg(i,off);
+                    return <tr key={r.n} style={{background:bg,borderBottom:"1px solid #E1F6C8",opacity:off?0.65:1}}>
+                      <td style={{padding:"8px 10px",fontWeight:600,position:"sticky",left:0,background:bg}}>
+                        <div style={{display:"flex",alignItems:"center",flexWrap:"wrap",gap:2}}>
+                        <span style={{cursor:unlocked?"pointer":"default",color:"#092903",textDecoration:unlocked?"underline":"none",textDecorationStyle:"dotted"}} onClick={function(){ if(unlocked) setShowEditRep(r.n); }}>{r.n}</span>
+                          <Badge s={r.s}/>
+                        </div>
+                      </td>
+                      <td style={{padding:"8px 10px"}}><span style={{background:"#E9FAE5",color:"#239A0D",padding:"2px 8px",borderRadius:20,fontSize:11,fontWeight:600}}>{r.t}</span></td>
+                      <td style={{padding:"8px 10px",textAlign:"right",color:"#092903"}}>{fmt(yT)}</td>
+                      <td style={{padding:"8px 10px",textAlign:"right",color:"#239A0D",fontWeight:600}}>{fmt(yA)}</td>
+                      <td style={{padding:"8px 10px",textAlign:"center"}}><Chip p={yP}/></td>
+                      <td style={{padding:"8px 10px",textAlign:"right",fontWeight:600,color:togo>=0?"#32CE13":"#dc2626"}}>{(togo>=0?"+":"")+fmt(togo)}</td>
+                      <td style={{padding:"4px 6px",textAlign:"right"}}>{editId==="fc-"+r.n&&unlocked?<input autoFocus type="number" defaultValue={fc} onBlur={function(e){setMetaF(r.n,"fc",Number(e.target.value)||0);setEditId(null);}} onKeyDown={function(e){if(e.key==="Enter"){setMetaF(r.n,"fc",Number(e.target.value)||0);setEditId(null);}}} style={{width:72,padding:"2px 4px",fontSize:12,border:"2px solid #32CE13",borderRadius:4,textAlign:"right"}}/>:<span onClick={function(){if(unlocked)setEditId("fc-"+r.n);}} style={{cursor:unlocked?"pointer":"default",display:"block",padding:"2px 6px",borderRadius:4,color:fc>0?"#239A0D":"#94a3b8",background:fc>0?"#E9FAE5":"transparent"}}>{fmt(fc)}</span>}</td>
+                      <td style={{padding:"8px 10px",textAlign:"right",color:"#239A0D",fontWeight:600}}>{fmt(mA)}</td>
+                      <td style={{padding:"8px 10px",textAlign:"right",fontWeight:600,color:fToGo>=0?"#32CE13":"#dc2626"}}>{(fToGo>=0?"+":"")+fmt(fToGo)}</td>
+                      <td style={{padding:"8px 10px",textAlign:"center"}}>{fAcc!==null?<Chip p={fAcc}/>:"—"}</td>
+                      <td style={{padding:"8px 10px",textAlign:"center"}}>
+                        <button onClick={function(){if(unlocked)setMetaF(r.n,"ef",!meta[r.n].ef);}} style={{width:24,height:24,borderRadius:5,border:"none",cursor:unlocked?"pointer":"default",background:meta[r.n]&&meta[r.n].ef?"#32CE13":"#e2e8f0",color:meta[r.n]&&meta[r.n].ef?"#092903":"#94a3b8",fontWeight:700,fontSize:14}}>{meta[r.n]&&meta[r.n].ef?"✔":""}</button>
+                      </td>
+                      <td style={{padding:"4px 6px",textAlign:"center"}}>
+                        <input type="number" min="0" value={meta[r.n]?meta[r.n].nl:0}
+                          onChange={function(e){if(unlocked)setMetaF(r.n,"nl",Number(e.target.value)||0);}}
+                          readOnly={!unlocked}
+                          style={{width:40,padding:"2px 4px",fontSize:12,border:"1px solid #A6EB93",borderRadius:4,textAlign:"center",background:meta[r.n]&&meta[r.n].nl>0?"#E9FAE5":"#fff"}}/>
+                      </td>
+                      <td style={{padding:"8px 10px",textAlign:"center"}}>
+                        <button onClick={function(){if(unlocked)setMetaF(r.n,"mq",!meta[r.n].mq);}} style={{width:24,height:24,borderRadius:5,border:"none",cursor:unlocked?"pointer":"default",background:meta[r.n]&&meta[r.n].mq?"#32CE13":"#e2e8f0",color:meta[r.n]&&meta[r.n].mq?"#092903":"#94a3b8",fontWeight:700,fontSize:14}}>{meta[r.n]&&meta[r.n].mq?"✔":""}</button>
+                      </td>
+                    </tr>;
+                  })}
+                </tbody>
+              </table>
+            </div>
+            <div style={{marginTop:8,fontSize:11,color:"#4A7C59"}}>💡 Click a rep's name to update their status</div>
+          </div>
+        )}
+
+        {/* ── TAB 2: DATA ENTRY ── */}
+        {tab===2&&(
+          <div>
+            <div style={{display:"flex",gap:10,marginBottom:14,flexWrap:"wrap",alignItems:"center"}}>
+              <select value={selTeam} onChange={function(e){setSelTeam(e.target.value);}} style={{padding:"7px 12px",borderRadius:6,border:"1px solid #A6EB93",fontSize:13,color:"#092903"}}>{TEAMS.map(function(t){ return <option key={t}>{t}</option>; })}</select>
+              <select value={selAdj} onChange={function(e){setSelAdj(e.target.value);}} style={{padding:"7px 12px",borderRadius:6,border:"1px solid #A6EB93",fontSize:13,color:"#092903"}}>{ADJ.map(function(a){ return <option key={a}>{a}</option>; })}</select>
+              <span style={{fontSize:12,color:"#4A7C59"}}>Click any Actual cell to edit</span>
+            </div>
+            <div style={{overflowX:"auto"}}>
+              <table style={TBLS}>
+                <thead><tr style={{background:TCOL[selTeam]||"#092903",color:"#fff"}}>
+                  <th style={{padding:"9px 12px",textAlign:"left",minWidth:160}}>Rep</th>
+                  <th style={{padding:"9px 6px",textAlign:"center",width:50,fontSize:11}}>Row</th>
+                  {MONTHS.map(function(m){ return <th key={m} style={{padding:"9px 5px",textAlign:"right",minWidth:70}}>{m}</th>; })}
+                  <th style={{padding:"9px 8px",textAlign:"right",minWidth:90}}>Total</th>
+                  <th style={{padding:"9px 8px",textAlign:"center",minWidth:68}}>Ach%</th>
+                </tr></thead>
+                <tbody>{reps.filter(function(r){ return r.t===selTeam; }).map(function(r,ri){
+                  var off=!!r.s;
+                  var totT=MONTHS.reduce(function(s,m){ return s+((data[r.n]&&data[r.n][selAdj]&&data[r.n][selAdj][m])?data[r.n][selAdj][m].T:0); },0);
+                  var totA=MONTHS.reduce(function(s,m){ return s+((data[r.n]&&data[r.n][selAdj]&&data[r.n][selAdj][m])?data[r.n][selAdj][m].A:0); },0);
+                  var ap=pct(totA,totT); var bg=rowBg(ri,off);
                   return [
-                    React.createElement('tr',{key:sg.k+'T',style:{background:bg}},
-                      React.createElement('td',{rowSpan:adj==='MRR'?3:2,style:{padding:'6px 10px',fontWeight:700,verticalAlign:'middle',color:sg.color,borderRight:'2px solid #e5e7eb'}},sg.label),
-                      React.createElement('td',{style:{padding:'4px 6px',fontSize:11,color:'#6b7280',textAlign:'center'}},'Target'),
-                      months.map(function(m){
-                        var isFuture=MONTHS.indexOf(m)>selMonthIdx;
-                        var v=segMonVal(sg.k,adj,m,'T');
-                        return React.createElement('td',{key:m,style:{padding:'4px 6px',textAlign:'center',color:isFuture?'#9ca3af':'#374151',fontStyle:isFuture?'italic':'normal'}},v?fmtK(v):'P0');
-                      }),
-                      React.createElement('td',{style:{padding:'4px 6px',textAlign:'right',fontWeight:600}},adj==='MRR'?fmtK(sYtdT):'—'),
-                      React.createElement('td',{style:{padding:'4px 6px',textAlign:'right',fontWeight:600}},adj==='MRR'?fmtK(sYtdA):'—'),
-                      React.createElement('td',{style:{padding:'4px 6px',textAlign:'right'}},adj==='MRR'&&sPct!==null?React.createElement(Chip,{p:sPct}):'—')
-                    ),
-                    React.createElement('tr',{key:sg.k+'A',style:{background:bg}},
-                      React.createElement('td',{style:{padding:'4px 6px',fontSize:11,textAlign:'center',background:'rgba(50,206,19,0.08)',fontWeight:600,color:H}},'Actual'),
-                      months.map(function(m){
-                        var isFuture=MONTHS.indexOf(m)>selMonthIdx;
-                        var v=segMonVal(sg.k,adj,m,'A');
-                        if (isFuture) return React.createElement('td',{key:m,style:{padding:'4px 6px',textAlign:'center',color:'#9ca3af'}},'P0');
-                        if (!unlocked) return React.createElement('td',{key:m,style:{padding:'4px 6px',textAlign:'center',fontWeight:600,background:'rgba(50,206,19,0.08)'}},v?React.createElement('span',{style:{color:'#059669',fontWeight:600}},'₱'+v.toLocaleString()):'P0');
-                        return React.createElement('td',{key:m,style:{padding:'4px 6px',background:'rgba(50,206,19,0.08)'}},
-                          React.createElement('input',{type:'number',value:v||'',onChange:function(e){setSegF(sg.k,adj,m,'A',Number(e.target.value)||0);},readOnly:adj==='MRR',style:Object.assign({},inputStyle(!unlocked||adj==='MRR'),{width:70})})
-                        );
-                      }),
-                      React.createElement('td',{style:{padding:'4px 6px',textAlign:'right',fontWeight:600,background:'rgba(50,206,19,0.08)'}},'—'),
-                      React.createElement('td',{style:{padding:'4px 6px',textAlign:'right',fontWeight:700,background:'rgba(50,206,19,0.08)'}},adj==='MRR'?React.createElement('span',{style:{color:aC(sPct)}},fmtK(sYtdA)):'—'),
-                      React.createElement('td',{style:{padding:'4px 6px',background:'rgba(50,206,19,0.08)'}})
-                    ),
-                    adj==='MRR'?React.createElement('tr',{key:sg.k+'P',style:{background:bg}},
-                      React.createElement('td',{style:{padding:'4px 6px',fontSize:11,textAlign:'center',color:'#6b7280'}},'Ach%'),
-                      months.map(function(m){
-                        var isFuture=MONTHS.indexOf(m)>selMonthIdx;
-                        if (isFuture) return React.createElement('td',{key:m,style:{padding:'4px 6px',textAlign:'center',color:'#9ca3af'}},'—');
-                        var t2=segMonVal(sg.k,adj,m,'T');
-                        var a2=segMonVal(sg.k,adj,m,'A');
-                        var p2=t2?pct(a2,t2):null;
-                        return React.createElement('td',{key:m,style:{padding:'4px 6px',textAlign:'center'}},p2!==null?React.createElement(Chip,{p:p2}):'—');
-                      }),
-                      React.createElement('td',null),React.createElement('td',null),React.createElement('td',null)
-                    ):null
+                    <tr key={r.n+"T"} style={{background:bg,opacity:off?0.7:1}}>
+                      <td style={{padding:"6px 12px",fontWeight:600,color:"#092903",borderTop:"2px solid #E1F6C8"}} rowSpan={3}><div style={{display:"flex",alignItems:"center",gap:4}}>{r.n}<Badge s={r.s}/></div></td>
+                      <td style={{padding:"6px 6px",color:"#4A7C59",fontSize:11,borderTop:"2px solid #E1F6C8"}}>Target</td>
+                      {MONTHS.map(function(m){ return <td key={m} style={{padding:"6px 5px",textAlign:"right",borderTop:"2px solid #E1F6C8",color:"#092903"}}>{fmt((data[r.n]&&data[r.n][selAdj]&&data[r.n][selAdj][m])?data[r.n][selAdj][m].T:0)}</td>; })}
+                      <td style={{padding:"6px 8px",textAlign:"right",fontWeight:600,borderTop:"2px solid #E1F6C8",color:"#092903"}}>{fmt(totT)}</td>
+                      <td rowSpan={3} style={{padding:"6px 8px",textAlign:"center",fontWeight:700,fontSize:13,borderTop:"2px solid #E1F6C8",color:aC(ap),background:aBg(ap)}}>{ap.toFixed(1)+"%"}</td>
+                    </tr>,
+                    <tr key={r.n+"A"} style={{background:off?"#FFFAEC":ri%2===0?"#E9FAE5":"#F0F9B3",opacity:off?0.7:1}}>
+                      <td style={{padding:"6px 6px",color:"#239A0D",fontSize:11,fontWeight:600}}>Actual</td>
+                      {MONTHS.map(function(m){
+                        var cid=r.n+"-"+selAdj+"-"+m;
+                        var val=(data[r.n]&&data[r.n][selAdj]&&data[r.n][selAdj][m])?data[r.n][selAdj][m].A:0;
+                        return <td key={m} style={{padding:"2px 3px",textAlign:"right"}}>
+                          {editId===cid&&unlocked?<input autoFocus type="number" defaultValue={val} onBlur={function(e){setActual(r.n,selAdj,m,e.target.value);setEditId(null);}} onKeyDown={function(e){if(e.key==="Enter"){setActual(r.n,selAdj,m,e.target.value);setEditId(null);}}} style={{width:62,padding:"2px 3px",fontSize:11,border:"2px solid #32CE13",borderRadius:3,textAlign:"right"}}/>:<span onClick={function(){if(unlocked)setEditId(cid);}} style={{cursor:unlocked?"pointer":"default",display:"block",padding:"3px 5px",borderRadius:3,color:val>0?"#239A0D":"#94a3b8",background:val>0?"#C9F3BE":"transparent"}}>{fmt(val)}</span>}
+                        </td>;
+                      })}
+                      <td style={{padding:"6px 8px",textAlign:"right",fontWeight:600,color:"#239A0D"}}>{fmt(totA)}</td>
+                    </tr>,
+                    <tr key={r.n+"P"} style={{background:bg,opacity:off?0.7:1}}>
+                      <td style={{padding:"4px 6px",color:"#4A7C59",fontSize:11}}>Ach%</td>
+                      {MONTHS.map(function(m){ var T=(data[r.n]&&data[r.n][selAdj]&&data[r.n][selAdj][m])?data[r.n][selAdj][m].T:0; var A=(data[r.n]&&data[r.n][selAdj]&&data[r.n][selAdj][m])?data[r.n][selAdj][m].A:0; var p=pct(A,T); return <td key={m} style={{padding:"4px 5px",textAlign:"right",fontSize:11,fontWeight:600,color:T>0?aC(p):"#94a3b8"}}>{T>0?p.toFixed(1)+"%":"—"}</td>; })}
+                      <td style={{padding:"4px 8px",textAlign:"right",fontSize:11,fontWeight:600,color:aC(ap)}}>{ap.toFixed(1)+"%"}</td>
+                    </tr>
                   ];
-                }),
-                React.createElement('tr',{style:{background:H,color:'#fff',fontWeight:700}},
-                  React.createElement('td',{style:{padding:'8px 10px'}},'Sales (Total)'),
-                  React.createElement('td',{style:{padding:'8px 6px',textAlign:'center',fontSize:11}}),
-                  months.map(function(m){return React.createElement('td',{key:m,style:{padding:'8px 6px'}});}),
-                  React.createElement('td',{style:{padding:'8px 6px',textAlign:'right'}},adj==='MRR'?fmtK(totals.ytdT):'—'),
-                  React.createElement('td',{style:{padding:'8px 6px',textAlign:'right'}},adj==='MRR'?fmtK(totals.ytdA):'—'),
-                  React.createElement('td',{style:{padding:'8px 6px',textAlign:'right'}},adj==='MRR'?React.createElement(Chip,{p:pct(totals.ytdA,totals.ytdT)}):'—')
-                )
-              )
-            )
-          )
-        );
-      })
-    );
-  }
+                })}</tbody>
+              </table>
+            </div>
+          </div>
+        )}
 
-  // ---- REP SUMMARY TAB ----
-  function renderRepSummary() {
-    var showEF = efToggle;
-    var showMQ = mqToggle;
+        {/* ── TAB 3: LEADERBOARD ── */}
+        {tab===3&&(
+          <div>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+              <b style={{color:"#092903",fontSize:15}}>🏆 Leaderboard — ranked by YTD Att%</b>
+              <label style={{display:"flex",alignItems:"center",gap:5,fontSize:12,color:"#4A7C59",cursor:"pointer"}}><input type="checkbox" checked={showInact} onChange={function(e){setShowInact(e.target.checked);}}/> Show inactive</label>
+            </div>
+            <div style={{overflowX:"auto"}}>
+              <table style={TBLS}>
+                <thead><tr style={{background:"#092903",color:"#fff"}}>
+                  <th style={{padding:"9px 10px",textAlign:"center",width:"4%",color:"#fff"}}>#</th>
+                  <th style={{padding:"9px 10px",textAlign:"left",width:"22%",color:"#fff"}}>Rep</th>
+                  <th style={{padding:"9px 10px",textAlign:"left",width:"18%",color:"#fff"}}>Team</th>
+                  <th style={{padding:"9px 10px",textAlign:"right",width:"12%",color:"#fff"}}>MRR Ach%</th>
+                  <th style={{padding:"9px 10px",textAlign:"right",width:"12%",color:"#fff"}}>E/F Ach%</th>
+                  <th style={{padding:"9px 10px",textAlign:"right",width:"16%",color:"#fff"}}>YTD Won</th>
+                  <th style={{padding:"9px 10px",textAlign:"center",width:"12%",color:"#fff"}}>YTD Att%</th>
+                </tr></thead>
+                <tbody>{lbReps.map(function(r,i){
+                  var bg=r.s?"#FFFAEC":i===0?"#E9FAE5":i%2===0?"#fff":"#F7F9ED";
+                  return <tr key={r.n} style={{background:bg,borderBottom:"1px solid #E1F6C8",opacity:r.s?0.7:1}}>
+                    <td style={{padding:"10px",textAlign:"center",fontWeight:700,color:r.s?"#94a3b8":i===0?"#32CE13":i===1?"#8139EE":i===2?"#1679FA":"#4A7C59"}}>{r.s?"—":i===0?"🥇":i===1?"🥈":i===2?"🥉":i+1}</td>
+                    <td style={{padding:"10px"}}><div style={{display:"flex",alignItems:"center",gap:4}}><span style={{fontWeight:600,color:"#092903"}}>{r.n}</span><Badge s={r.s}/></div></td>
+                    <td style={{padding:"10px"}}><span style={{background:"#E9FAE5",color:"#239A0D",padding:"3px 8px",borderRadius:20,fontSize:11,fontWeight:600}}>{r.t}</span></td>
+                    <td style={{padding:"10px",textAlign:"right",fontWeight:600,color:aC(r.MRR.p)}}>{r.MRR.p.toFixed(1)+"%"}</td>
+                    <td style={{padding:"10px",textAlign:"right",fontWeight:600,color:aC(r["E/F"].p)}}>{r["E/F"].p.toFixed(1)+"%"}</td>
+                    <td style={{padding:"10px",textAlign:"right",fontWeight:600,color:"#092903"}}>{fmt(ytdA(r.n))}</td>
+                    <td style={{padding:"10px",textAlign:"center"}}><Chip p={r.ytdP}/></td>
+                  </tr>;
+                })}</tbody>
+              </table>
+            </div>
+            <div style={{marginTop:8,fontSize:11,color:"#4A7C59"}}>🟢 ≥100% Green Apple · 🔵 80–99% Blueberry · 🟠 60–79% Carrot · 🔴 &lt;60%</div>
+          </div>
+        )}
 
-    function repYtdA(n){ return ytdA(n,data,selMonth); }
-    function repYtdT(n){ return ytdT(n,selMonth); }
-    function repFc(n){ return meta[n]?meta[n].fc||0:0; }
-    function repMonA(n){ return data[n]&&data[n]['MRR']&&data[n]['MRR'][selMonth]?data[n]['MRR'][selMonth].A:0; }
-    function repMonT(n){ var rep=reps.find(function(r){return r.n===n;}); if(!rep) return 0; var q=QUOTAS[rep.t]; return q&&q.MRR&&q.MRR[selMonth]?q.MRR[selMonth]:0; }
+        {/* ── TAB 4: TEAMS ── */}
+        {tab===4&&(
+          <div>
+            <b style={{color:"#092903",fontSize:15,display:"block",marginBottom:14}}>👥 Team Dashboard</b>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(300px,1fr))",gap:14}}>
+              {TEAMS.map(function(tm){
+                var tmReps=reps.filter(function(r){ return r.t===tm; });
+                if(!tmReps.length) return null;
+                var sums=tmReps.map(function(r){ var s=repSum(r.n); s.n=r.n; s.s=r.s; return s; });
+                var activeInTeam=sums.filter(function(r){ return !r.s; });
+                var inactInTeam=sums.filter(function(r){ return !!r.s; });
+                activeInTeam.sort(function(a,b){ return b.all.p-a.all.p; });
+                var sorted=activeInTeam.concat(inactInTeam);
+                var T=activeInTeam.reduce(function(s,r){ return s+r.all.T; },0);
+                var A=activeInTeam.reduce(function(s,r){ return s+r.all.A; },0);
+                var tp=pct(A,T);
+                var col=TCOL[tm]||"#092903";
+                return <div key={tm} style={{background:"#fff",borderRadius:10,boxShadow:"0 1px 4px rgba(9,41,3,0.1)",overflow:"hidden"}}>
+                  <div style={{background:col,color:"#fff",padding:"10px 14px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                    <span style={{fontWeight:700}}>{tm}</span>
+                    <span style={{fontSize:11,opacity:.85}}>{activeInTeam.length+" active"+(inactInTeam.length>0?" · "+inactInTeam.length+" inactive":"")}</span>
+                  </div>
+                  <div style={{padding:14}}>
+                    <div style={{display:"flex",justifyContent:"space-between",marginBottom:12,background:"#F7F9ED",borderRadius:7,padding:"8px 12px"}}>
+                      <div style={{textAlign:"center"}}><div style={{fontSize:10,color:"#4A7C59",marginBottom:2}}>TARGET</div><div style={{fontWeight:700,fontSize:12,color:"#092903"}}>{fmtK(T)}</div></div>
+                      <div style={{textAlign:"center"}}><div style={{fontSize:10,color:"#4A7C59",marginBottom:2}}>ACTUAL</div><div style={{fontWeight:700,fontSize:12,color:"#32CE13"}}>{fmtK(A)}</div></div>
+                      <div style={{textAlign:"center"}}><div style={{fontSize:10,color:"#4A7C59",marginBottom:2}}>ATTAINMENT</div><div style={{fontWeight:700,fontSize:16,color:aC(tp)}}>{tp.toFixed(1)+"%"}</div></div>
+                    </div>
+                    {sorted.map(function(r){
+                      return <div key={r.n} style={{marginBottom:8,opacity:r.s?0.45:1}}>
+                        <div style={{display:"flex",justifyContent:"space-between",fontSize:12,marginBottom:3}}>
+                          <span style={{fontWeight:500,display:"flex",alignItems:"center",gap:3,color:"#092903"}}>{r.n.split(" ")[0]}<Badge s={r.s}/></span>
+                          <span style={{fontWeight:700,color:r.s?"#94a3b8":aC(r.all.p)}}>{r.all.p.toFixed(1)+"%"}</span>
+                        </div>
+                        <div style={{background:"#E1F6C8",borderRadius:3,height:7}}>
+                          <div style={{width:Math.min(r.all.p,100)+"%",background:r.s?"#cbd5e1":aC(r.all.p),borderRadius:3,height:7}}/>
+                        </div>
+                      </div>;
+                    })}
+                    {activeInTeam.length>1&&(
+                      <div style={{marginTop:10,display:"flex",gap:6,fontSize:11}}>
+                        <span style={{background:"#E9FAE5",color:"#239A0D",padding:"2px 8px",borderRadius:20}}>🔝 {activeInTeam[0].n.split(" ")[0]}</span>
+                        <span style={{background:"#fee2e2",color:"#dc2626",padding:"2px 8px",borderRadius:20}}>📉 {activeInTeam[activeInTeam.length-1].n.split(" ")[0]}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>;
+              })}
+            </div>
+          </div>
+        )}
 
-    var totMonT = activeReps.reduce(function(s,r){return s+repMonT(r.n);},0);
-    var totFcAcc = totFc>0?pct(totMonA,totFc):null;
+        {/* ── TAB 5: ACCELERATOR ── */}
+        {tab===5&&(
+          <div>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12,flexWrap:"wrap",gap:8}}>
+              <b style={{color:"#092903",fontSize:15}}>⚡ Accelerator — Monthly Hit Tracker</b>
+              <div style={{display:"flex",gap:10,fontSize:11,color:"#4A7C59"}}>
+                <span>Click to cycle:</span>
+                <span style={{color:"#94a3b8",fontWeight:600}}>— blank</span>
+                <span style={{color:"#32CE13",fontWeight:600}}>✔ hit</span>
+                <span style={{color:"#dc2626",fontWeight:600}}>✘ missed</span>
+              </div>
+            </div>
+            <div style={{overflowX:"auto"}}>
+              <table style={TBLS}>
+                <thead><tr style={{background:"#092903",color:"#fff"}}>
+                  <th style={{padding:"9px 10px",textAlign:"left",minWidth:80}}>Segment</th>
+                  <th style={{padding:"9px 12px",textAlign:"left",minWidth:155}}>Rep</th>
+                  {MONTHS.map(function(m){ return <th key={m} style={{padding:"9px 6px",textAlign:"center",minWidth:55}}>{m}</th>; })}
+                  <th style={{padding:"9px 8px",textAlign:"center",minWidth:58}}>Total ✔</th>
+                </tr></thead>
+                <tbody>{activeReps.map(function(r,i){
+                  var bg=i%2===0?"#fff":"#F7F9ED";
+                  var hits=MONTHS.filter(function(m){ return accel[r.n]&&accel[r.n][m]===true; }).length;
+                  return <tr key={r.n} style={{background:bg,borderBottom:"1px solid #E1F6C8"}}>
+                    <td style={{padding:"8px 10px",color:"#4A7C59",fontSize:11,fontWeight:600}}>{SEGMAP[r.t]||r.t}</td>
+                    <td style={{padding:"8px 12px",fontWeight:600,color:"#092903"}}>{r.n}</td>
+                    {MONTHS.map(function(m){
+                      var val=accel[r.n]?accel[r.n][m]:null;
+                      return <td key={m} style={{padding:"3px 3px",textAlign:"center"}}>
+                        <button onClick={function(){ if(unlocked) toggleAccel(r.n,m); }} style={{width:32,height:28,borderRadius:6,border:"none",cursor:unlocked?"pointer":"default",fontSize:14,fontWeight:700,background:val===true?"#E9FAE5":val===false?"#fee2e2":"#F7F9ED",color:val===true?"#32CE13":val===false?"#dc2626":"#94a3b8",opacity:unlocked?1:0.7}}>{val===true?"✔":val===false?"✘":"—"}</button>
+                      </td>;
+                    })}
+                    <td style={{padding:"8px",textAlign:"center",fontWeight:700,color:hits>0?"#32CE13":"#94a3b8",fontSize:14}}>{hits}</td>
+                  </tr>;
+                })}</tbody>
+              </table>
+            </div>
+          </div>
+        )}
 
-    return React.createElement('div',{style:{padding:'16px',overflowX:'auto'}},
-      React.createElement('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:12,flexWrap:'wrap',gap:8}},
-        React.createElement('h2',{style:{fontSize:16,fontWeight:700,color:H}},'📋 Rep Summary – YTD Jan–'+selMonth),
-        React.createElement('div',{style:{display:'flex',alignItems:'center',gap:12,flexWrap:'wrap',fontSize:12}},
-          React.createElement('div',{style:{display:'flex',gap:8}},
-            [{p:100,label:'≥100%'},{p:85,label:'80–99%'},{p:70,label:'60–79%'},{p:50,label:'<60%'}].map(function(x){
-              return React.createElement('span',{key:x.label,style:{display:'flex',alignItems:'center',gap:3}},
-                React.createElement('span',{style:{width:8,height:8,borderRadius:'50%',background:aC(x.p),display:'inline-block'}}),
-                x.label
-              );
-            })
-          ),
-          React.createElement('label',{style:{display:'flex',alignItems:'center',gap:4,cursor:'pointer'}},
-            React.createElement('input',{type:'checkbox',checked:showInact,onChange:function(e){setShowInact(e.target.checked);},style:{accentColor:G}}),
-            'Show inactive'
-          )
-        )
-      ),
-      React.createElement('div',{style:{overflowX:'auto'}},
-        React.createElement('table',{style:{width:'100%',borderCollapse:'collapse',fontSize:12,minWidth:900}},
-          React.createElement('thead',null,
-            React.createElement('tr',null,
-              React.createElement('th',{style:THS({textAlign:'left',position:'sticky',left:0,zIndex:2})},'Rep'),
-              React.createElement('th',{style:THS({textAlign:'left'})},'Team'),
-              React.createElement('th',{style:THS({textAlign:'right'})},'YTD Quota'),
-              React.createElement('th',{style:THS({textAlign:'right',cursor:'pointer'}),onClick:function(){handleSort('ytdA');}},
-                'YTD Won '+(sortCol==='ytdA'?(sortDir==='desc'?'▼':'▲'):'')
-              ),
-              React.createElement('th',{style:THS({textAlign:'right',cursor:'pointer'}),onClick:function(){handleSort('ytdPct');}},
-                'YTD Att% '+(sortCol==='ytdPct'?(sortDir==='desc'?'▼':'▲'):'')
-              ),
-              React.createElement('th',{style:THS({textAlign:'right'})},'To Go'),
-              React.createElement('th',{style:THS({textAlign:'right'})},selMonth+' Forecast'),
-              React.createElement('th',{style:THS({textAlign:'right'})},selMonth+' Actual'),
-              React.createElement('th',{style:THS({textAlign:'right'})},'Fcst To Go'),
-              React.createElement('th',{style:THS({textAlign:'right',cursor:'pointer',userSelect:'none'}),onClick:function(){setEfToggle(!efToggle);}},
-                React.createElement('span',{style:{background:efToggle?G:'rgba(255,255,255,0.2)',color:efToggle?H:'#fff',padding:'2px 8px',borderRadius:10,fontSize:11,fontWeight:600}},'E/F')
-              ),
-              React.createElement('th',{style:THS({textAlign:'center'})},'Logos'),
-              React.createElement('th',{style:THS({textAlign:'center',cursor:'pointer',userSelect:'none'}),onClick:function(){setMqToggle(!mqToggle);}},
-                React.createElement('span',{style:{background:mqToggle?G:'rgba(255,255,255,0.2)',color:mqToggle?H:'#fff',padding:'2px 8px',borderRadius:10,fontSize:11,fontWeight:600}},'M/Q')
-              )
-            )
-          ),
-          React.createElement('tbody',null,
-            React.createElement('tr',{style:{background:'#32CE13',fontWeight:700,color:H}},
-              React.createElement('td',{style:{padding:'8px 10px',position:'sticky',left:0,background:'#32CE13'}},'TOTAL'),
-              React.createElement('td',null),
-              React.createElement('td',{style:{padding:'8px 10px',textAlign:'right'}},fmtK(totYtdT)),
-              React.createElement('td',{style:{padding:'8px 10px',textAlign:'right'}},fmtK(totYtdA)),
-              React.createElement('td',{style:{padding:'8px 10px',textAlign:'right'}},React.createElement(Chip,{p:pct(totYtdA,totYtdT)})),
-              React.createElement('td',{style:{padding:'8px 10px',textAlign:'right',color:totYtdA>=totYtdT?'#166534':'#991b1b'}},fmt(totYtdA-totYtdT)),
-              React.createElement('td',{style:{padding:'8px 10px',textAlign:'right'}},fmtK(totFc)),
-              React.createElement('td',{style:{padding:'8px 10px',textAlign:'right'}},fmtK(totMonA)),
-              React.createElement('td',{style:{padding:'8px 10px',textAlign:'right',color:totMonA>=totFc?'#166534':'#991b1b'}},fmt(totMonA-totFc)),
-              React.createElement('td',{style:{padding:'8px 10px',textAlign:'right'}},totFcAcc!==null?React.createElement(Chip,{p:totFcAcc}):'—'),
-              React.createElement('td',{style:{padding:'8px 10px',textAlign:'center'}},totNL),
-              React.createElement('td',null)
-            ),
-            sortedReps.map(function(r,i){
-              var off = r.s&&r.s!=='maternity';
-              var bg = rowBg(i,off);
-              var yA=repYtdA(r.n), yT=repYtdT(r.n), yP=pct(yA,yT);
-              var togo=yA-yT, fc=repFc(r.n), mA=repMonA(r.n);
-              var fToGo=mA-fc, fAcc=fc>0?pct(mA,fc):null;
-              return React.createElement('tr',{key:r.n,style:{background:bg}},
-                React.createElement('td',{style:{padding:'8px 10px',position:'sticky',left:0,background:bg,fontWeight:600,whiteSpace:'nowrap'}},
-                  React.createElement('span',{
-                    style:{cursor:unlocked?'pointer':'default',textDecoration:unlocked?'underline':'none',textDecorationStyle:'dotted',color:H},
-                    onClick:function(){if(unlocked)setShowEditRep(r.n);}
-                  },r.n),
-                  React.createElement(Badge,{s:r.s})
-                ),
-                React.createElement('td',{style:{padding:'8px 6px'}},
-                  React.createElement('span',{style:{background:'#E9FAE5',color:H,padding:'2px 8px',borderRadius:20,fontSize:11,fontWeight:600}},r.t)
-                ),
-                React.createElement('td',{style:{padding:'8px 10px',textAlign:'right',color:'#092903'}},fmtK(yT)),
-                React.createElement('td',{style:{padding:'8px 10px',textAlign:'right',fontWeight:600,color:'#32CE13'}},fmtK(yA)),
-                React.createElement('td',{style:{padding:'8px 10px',textAlign:'right'}},React.createElement(Chip,{p:yP})),
-                React.createElement('td',{style:{padding:'8px 10px',textAlign:'right',color:togo>=0?'#166534':'#991b1b',fontWeight:600}},fmt(togo)),
-                React.createElement('td',{style:{padding:'8px 10px',textAlign:'right',color:'#6b7280'}},
-                  !unlocked?fmtK(fc):React.createElement('input',{type:'number',value:fc||'',onChange:function(e){setMetaF(r.n,'fc',Number(e.target.value)||0);},style:inputStyle(false)})
-                ),
-                React.createElement('td',{style:{padding:'8px 10px',textAlign:'right',fontWeight:600,color:'#239A0D'}},fmtK(mA)),
-                React.createElement('td',{style:{padding:'8px 10px',textAlign:'right',color:fToGo>=0?'#166534':'#991b1b',fontWeight:600}},fmt(fToGo)),
-                React.createElement('td',{style:{padding:'8px 10px',textAlign:'center'}},
-                  React.createElement('input',{
-                    type:'checkbox',
-                    checked:meta[r.n]?meta[r.n].ef||false:false,
-                    onChange:function(e){if(unlocked)setMetaF(r.n,'ef',e.target.checked);},
-                    style:{width:15,height:15,accentColor:G,cursor:unlocked?'pointer':'default',pointerEvents:unlocked?'auto':'none',opacity:1}
-                  })
-                ),
-                React.createElement('td',{style:{padding:'4px 6px',textAlign:'center'}},
-                  !unlocked
-                    ? React.createElement('span',null,meta[r.n]?meta[r.n].nl||0:0)
-                    : React.createElement('input',{type:'number',min:'0',value:meta[r.n]?meta[r.n].nl||0:0,onChange:function(e){setMetaF(r.n,'nl',Number(e.target.value)||0);},readOnly:!unlocked,style:{width:40,padding:'2px 4px',fontSize:12,border:'1px solid #A6EB93',borderRadius:4,textAlign:'center'}})
-                ),
-                React.createElement('td',{style:{padding:'8px 6px',textAlign:'center'}},
-                  React.createElement('input',{
-                    type:'checkbox',
-                    checked:meta[r.n]?meta[r.n].mq||false:false,
-                    onChange:function(e){if(unlocked)setMetaF(r.n,'mq',e.target.checked);},
-                    style:{width:15,height:15,accentColor:G,cursor:unlocked?'pointer':'default',pointerEvents:unlocked?'auto':'none',opacity:1}
-                  })
-                )
-              );
-            })
-          )
-        )
-      )
-    );
-  }
-
-  // ---- DATA ENTRY TAB ----
-  function renderDataEntry() {
-    var teamReps = {};
-    TEAMS.forEach(function(t){ teamReps[t]=reps.filter(function(r){return r.t===t&&(!r.s||r.s==='maternity');}); });
-
-    return React.createElement('div',{style:{padding:'16px'}},
-      React.createElement('h2',{style:{fontSize:16,fontWeight:700,marginBottom:16,color:H}},'📝 Data Entry'),
-      !unlocked && React.createElement('div',{style:{background:'#fef9c3',border:'1px solid #fde047',borderRadius:8,padding:'10px 14px',marginBottom:16,fontSize:13}},'🔒 Unlock to enter data'),
-      TEAMS.map(function(team){
-        var tReps = teamReps[team];
-        if (!tReps||!tReps.length) return null;
-        return React.createElement('div',{key:team,style:{marginBottom:24,border:'1px solid #e5e7eb',borderRadius:8,overflow:'hidden'}},
-          React.createElement('div',{style:{background:H,color:'#fff',padding:'8px 14px',fontWeight:700,fontSize:13}},team),
-          React.createElement('div',{style:{overflowX:'auto'}},
-            React.createElement('table',{style:{width:'100%',borderCollapse:'collapse',fontSize:11}},
-              React.createElement('thead',null,
-                React.createElement('tr',null,
-                  React.createElement('th',{style:THS({textAlign:'left',width:120})},'Rep'),
-                  React.createElement('th',{style:THS({textAlign:'left',width:100})},'Type'),
-                  MONTHS.map(function(m){
-                    var isFuture=MONTHS.indexOf(m)>selMonthIdx;
-                    return React.createElement('th',{key:m,style:THS({textAlign:'center',opacity:isFuture?0.5:1})},m);
-                  })
-                )
-              ),
-              React.createElement('tbody',null,
-                tReps.map(function(r,ri){
-                  return ADJ.map(function(adj,ai){
-                    var bg = ri%2===0?(ai===0?'#fff':'#fafafa'):(ai===0?'#F7F9ED':'#f3f4f6');
-                    return React.createElement('tr',{key:r.n+adj,style:{background:bg}},
-                      ai===0?React.createElement('td',{rowSpan:ADJ.length,style:{padding:'6px 10px',fontWeight:600,verticalAlign:'middle',borderRight:'1px solid #e5e7eb',fontSize:11}},r.n):null,
-                      React.createElement('td',{style:{padding:'4px 8px',color:'#6b7280',fontSize:11,borderRight:'1px solid #e5e7eb',whiteSpace:'nowrap'}},adj),
-                      MONTHS.map(function(m){
-                        var isFuture=MONTHS.indexOf(m)>selMonthIdx;
-                        var v=data[r.n]&&data[r.n][adj]&&data[r.n][adj][m]?data[r.n][adj][m].A:0;
-                        if (isFuture) return React.createElement('td',{key:m,style:{padding:'4px',textAlign:'center',color:'#d1d5db'}},React.createElement('input',{type:'number',value:v||'',disabled:true,style:{width:64,padding:'2px',fontSize:11,border:'1px solid #e5e7eb',borderRadius:3,textAlign:'right',background:'#f9fafb',color:'#9ca3af'}}));
-                        if (!unlocked) return React.createElement('td',{key:m,style:{padding:'4px',textAlign:'center'}},React.createElement('input',{type:'number',value:v||'',readOnly:true,style:{width:64,padding:'2px',fontSize:11,border:'1px solid #e5e7eb',borderRadius:3,textAlign:'right',background:'#f9fafb',cursor:'default'}}));
-                        return React.createElement('td',{key:m,style:{padding:'4px'}},
-                          React.createElement('input',{type:'number',value:v||'',onChange:function(e){setDataF(r.n,adj,m,'A',Number(e.target.value)||0);},style:{width:64,padding:'2px',fontSize:11,border:'1px solid #A6EB93',borderRadius:3,textAlign:'right',background:'#fff'}})
-                        );
-                      })
-                    );
-                  });
-                })
-              )
-            )
-          )
-        );
-      })
-    );
-  }
-
-  // ---- LEADERBOARD TAB ----
-  function renderLeaderboard() {
-    var ranked = activeReps.map(function(r){
-      var yA=ytdA(r.n,data,selMonth), yT=ytdT(r.n,selMonth);
-      return {n:r.n,t:r.t,yA:yA,yT:yT,p:pct(yA,yT),s:r.s};
-    }).sort(function(a,b){return b.p-a.p;});
-
-    return React.createElement('div',{style:{padding:'16px',maxWidth:700}},
-      React.createElement('h2',{style:{fontSize:16,fontWeight:700,marginBottom:16,color:H}},'🏆 Leaderboard – YTD Jan–'+selMonth),
-      ranked.map(function(r,i){
-        var medal = i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
-        return React.createElement('div',{key:r.n,style:{display:'flex',alignItems:'center',gap:12,padding:'10px 14px',borderRadius:8,marginBottom:8,background:i===0?'#E9FAE5':i<3?'#fff':'#fafafa',border:i===0?'1px solid #A6EB93':'1px solid #e5e7eb'}},
-          React.createElement('div',{style:{width:28,textAlign:'center',fontWeight:700,color:'#9ca3af',fontSize:13}},medal||'#'+(i+1)),
-          React.createElement('div',{style:{flex:1}},
-            React.createElement('div',{style:{fontWeight:600,fontSize:13,color:H}},r.n),
-            React.createElement('div',{style:{fontSize:11,color:'#6b7280'}},r.t)
-          ),
-          React.createElement('div',{style:{textAlign:'right'}},
-            React.createElement('div',{style:{fontWeight:700,color:'#32CE13',fontSize:14}},fmtK(r.yA)),
-            React.createElement('div',{style:{fontSize:11,color:'#6b7280'}},'of '+fmtK(r.yT))
-          ),
-          React.createElement('div',{style:{width:64}},React.createElement(Chip,{p:r.p}))
-        );
-      })
-    );
-  }
-
-  // ---- TEAMS TAB ----
-  function renderTeams() {
-    var teamStats = TEAMS.map(function(t){
-      var tReps = activeReps.filter(function(r){return r.t===t;});
-      var tYtdA = tReps.reduce(function(s,r){return s+ytdA(r.n,data,selMonth);},0);
-      var tYtdT = tReps.reduce(function(s,r){return s+ytdT(r.n,selMonth);},0);
-      var p = pct(tYtdA,tYtdT);
-      return {t:t,a:tYtdA,q:tYtdT,p:p,reps:tReps};
-    }).sort(function(a,b){return b.p-a.p;});
-
-    return React.createElement('div',{style:{padding:'16px'}},
-      React.createElement('h2',{style:{fontSize:16,fontWeight:700,marginBottom:16,color:H}},'👥 Teams – YTD Jan–'+selMonth),
-      teamStats.map(function(ts,i){
-        return React.createElement('div',{key:ts.t,style:{marginBottom:16,border:'1px solid #e5e7eb',borderRadius:8,overflow:'hidden'}},
-          React.createElement('div',{style:{background:H,color:'#fff',padding:'10px 14px',display:'flex',alignItems:'center',justifyContent:'space-between'}},
-            React.createElement('div',{style:{fontWeight:700,fontSize:14}},ts.t),
-            React.createElement('div',{style:{display:'flex',gap:16,alignItems:'center',fontSize:13}},
-              React.createElement('span',null,fmtK(ts.a)+' / '+fmtK(ts.q)),
-              React.createElement(Chip,{p:ts.p})
-            )
-          ),
-          React.createElement('div',{style:{padding:'0'}},
-            ts.reps.map(function(r,ri){
-              var rA=ytdA(r.n,data,selMonth), rT=ytdT(r.n,selMonth), rP=pct(rA,rT);
-              return React.createElement('div',{key:r.n,style:{display:'flex',alignItems:'center',padding:'8px 14px',background:ri%2===0?'#fff':'#F7F9ED',borderTop:'1px solid #f3f4f6'}},
-                React.createElement('div',{style:{flex:1,fontWeight:500,fontSize:12,color:H}},r.n),
-                React.createElement('div',{style:{fontSize:12,color:'#6b7280',marginRight:16}},fmtK(rA)+' / '+fmtK(rT)),
-                React.createElement(Chip,{p:rP})
-              );
-            })
-          )
-        );
-      })
-    );
-  }
-
-  // ---- ACCELERATOR TAB ----
-  function renderAccelerator() {
-    return React.createElement('div',{style:{padding:'16px',overflowX:'auto'}},
-      React.createElement('h2',{style:{fontSize:16,fontWeight:700,marginBottom:16,color:H}},'⚡ Accelerator – Monthly Hit/Miss'),
-      React.createElement('div',{style:{overflowX:'auto'}},
-        React.createElement('table',{style:{width:'100%',borderCollapse:'collapse',fontSize:12}},
-          React.createElement('thead',null,
-            React.createElement('tr',null,
-              React.createElement('th',{style:THS({textAlign:'left',position:'sticky',left:0,zIndex:2})},'Rep'),
-              MONTHS.map(function(m){
-                var isFuture=MONTHS.indexOf(m)>selMonthIdx;
-                return React.createElement('th',{key:m,style:THS({textAlign:'center',opacity:isFuture?0.5:1})},m);
-              }),
-              React.createElement('th',{style:THS({textAlign:'center'})},'Hits'),
-              React.createElement('th',{style:THS({textAlign:'center'})},'%')
-            )
-          ),
-          React.createElement('tbody',null,
-            activeReps.map(function(r,i){
-              var bg = rowBg(i,false);
-              var hits = 0;
-              var months2 = MONTHS.slice(0, selMonthIdx+1);
-              months2.forEach(function(m){
-                var rep2 = reps.find(function(x){return x.n===r.n;});
-                if (!rep2) return;
-                var q = QUOTAS[rep2.t];
-                var target = q&&q.MRR&&q.MRR[m]?q.MRR[m]:0;
-                var actual = data[r.n]&&data[r.n]['MRR']&&data[r.n]['MRR'][m]?data[r.n]['MRR'][m].A:0;
-                if (target>0&&actual>=target) hits++;
-              });
-              var hitPct = months2.length>0?pct(hits,months2.length):0;
-              return React.createElement('tr',{key:r.n,style:{background:bg}},
-                React.createElement('td',{style:{padding:'8px 10px',fontWeight:600,position:'sticky',left:0,background:bg,whiteSpace:'nowrap'}},r.n),
-                MONTHS.map(function(m){
-                  var isFuture=MONTHS.indexOf(m)>selMonthIdx;
-                  if (isFuture) return React.createElement('td',{key:m,style:{padding:'6px',textAlign:'center',color:'#9ca3af'}},'—');
-                  var rep2=reps.find(function(x){return x.n===r.n;});
-                  var q=rep2&&QUOTAS[rep2.t];
-                  var target=q&&q.MRR&&q.MRR[m]?q.MRR[m]:0;
-                  var actual=data[r.n]&&data[r.n]['MRR']&&data[r.n]['MRR'][m]?data[r.n]['MRR'][m].A:0;
-                  var hit=target>0&&actual>=target;
-                  return React.createElement('td',{key:m,style:{padding:'6px',textAlign:'center'}},
-                    target>0?React.createElement('span',{style:{display:'inline-block',width:24,height:24,borderRadius:'50%',background:hit?G:'#fee2e2',border:'2px solid '+(hit?'#166534':'#dc2626'),lineHeight:'20px',fontSize:12,fontWeight:700,color:hit?H:'#dc2626'}},hit?'✓':'✗')
-                    :React.createElement('span',{style:{color:'#9ca3af'}},'—')
-                  );
-                }),
-                React.createElement('td',{style:{padding:'6px',textAlign:'center',fontWeight:700}},hits+'/'+months2.length),
-                React.createElement('td',{style:{padding:'6px',textAlign:'center'}},React.createElement(Chip,{p:hitPct}))
-              );
-            })
-          )
-        )
-      )
-    );
-  }
-
-  function renderContent() {
-    if (tab==='Segment') return renderSegment();
-    if (tab==='Rep Summary') return renderRepSummary();
-    if (tab==='Data Entry') return renderDataEntry();
-    if (tab==='Leaderboard') return renderLeaderboard();
-    if (tab==='Teams') return renderTeams();
-    if (tab==='Accelerator') return renderAccelerator();
-    return null;
-  }
-
-  return React.createElement('div',{style:{minHeight:'100vh',background:'#F7F9ED'}},
-    renderHeader(),
-    renderTabs(),
-    React.createElement('div',{style:{minHeight:'calc(100vh - 120px)'}},renderContent()),
-    renderPasswordModal(),
-    renderRepEditModal()
+      </div>
+    </div>
   );
 }
 
-ReactDOM.render(React.createElement(App), document.getElementById('root'));
+ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
 </script>
 </body>
 </html>
