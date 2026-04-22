@@ -41,6 +41,7 @@ var useMemo = React.useMemo;
 var EDIT_PASSWORD = "sprout2026";
 var MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 var ADJ = ["MRR","E/F","One-time Fees","Implementation"];
+var MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 var TEAMS = ["ENT Builders","ENT Hunters","SME Jetzsetters","SME Strikers","Channels","Upsell"];
 var TCOL = {"ENT Builders":"#092903","ENT Hunters":"#8139EE","SME Jetzsetters":"#1679FA","SME Strikers":"#FF7F00","Channels":"#239A0D","Upsell":"#dc2626"};
 var STCFG = {
@@ -311,7 +312,7 @@ function App(){
         <div style={{display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}>
           <span style={{fontSize:11,color:"#A6EB93"}}>{!dbReady?"⏳ Connecting...":saving?"💾 Saving...":lastSaved?"✅ Saved "+lastSaved:"✅ Connected"}</span>
           <button onClick={function(){if(unlocked){setUnlocked(false);}else{setShowLockModal(true);setPwInput("");}}} style={{padding:"5px 12px",borderRadius:6,border:"2px solid "+(unlocked?"#32CE13":"#4A7C59"),background:unlocked?"#32CE13":"transparent",color:unlocked?"#092903":"#A6EB93",fontSize:12,fontWeight:700,cursor:"pointer"}}>
-            {unlocked?"🔓 Edit Mode ON":"🔒 View Only"}
+            {unlocked?"🔓 Edit Mode ON":"🔒 View Only</button><button onClick={function(){window.location.reload();}} style={{background:"rgba(255,255,255,0.15)",color:"#fff",border:"1px solid rgba(255,255,255,0.3)",borderRadius:6,padding:"5px 12px",fontWeight:600,cursor:"pointer",fontSize:12}}>↻ Sync"}
           </button>
           <div style={{display:"flex",alignItems:"center",gap:6}}>
             <span style={{fontSize:12,color:"#A6EB93"}}>Month:</span>
