@@ -204,7 +204,7 @@ function App(){
   },[dbReady]);
 
   var save=useCallback(function(obj){
-    if(!dbReady) return;
+    if(!dbReady){setTimeout(function(){save(obj);},1000);return;}
     setSaving(true);
     window.__setDoc(window.__doc(window.__db,"tracker","state"),obj,{merge:true}).then(function(){
       setLastSaved(new Date().toLocaleTimeString());setSaving(false);
