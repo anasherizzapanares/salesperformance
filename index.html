@@ -192,6 +192,7 @@ function App(){
   },[]);
 
   useEffect(function(){
+    if(!window.__onSnapshot||!window.__db||!window.__doc){window.addEventListener("firebaseReady",function(){window.__onSnapshot(window.__doc(window.__db,"tracker","state"),function(snap){if(snap.exists()){var d=snap.data();if(d.data)setData(d.data);if(d.meta)setMeta(d.meta);if(d.accel)setAccel(d.accel);if(d.reps)setReps(d.reps);if(d.segA)setSegA(d.segA);if(d.curMon)setCurMon(d.curMon);}});},{once:true});return;}
     var unsub=window.__onSnapshot(window.__doc(window.__db,"tracker","state"),function(snap){
       if(snap.exists()){
         var d=snap.data();
