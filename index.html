@@ -312,7 +312,7 @@ function App(){
         <div style={{display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}>
           <span style={{fontSize:11,color:"#A6EB93"}}>{!dbReady?"⏳ Connecting...":saving?"💾 Saving...":lastSaved?"✅ Saved "+lastSaved:"✅ Connected"}</span>
           <button onClick={function(){if(unlocked){setUnlocked(false);}else{setShowLockModal(true);setPwInput("");}}} style={{padding:"5px 12px",borderRadius:6,border:"2px solid "+(unlocked?"#32CE13":"#4A7C59"),background:unlocked?"#32CE13":"transparent",color:unlocked?"#092903":"#A6EB93",fontSize:12,fontWeight:700,cursor:"pointer"}}>
-            {unlocked?"🔓 Edit Mode ON":"🔒 View Only</button><button onClick={function(){window.location.reload();}} style={{background:"rgba(255,255,255,0.15)",color:"#fff",border:"1px solid rgba(255,255,255,0.3)",borderRadius:6,padding:"5px 12px",fontWeight:600,cursor:"pointer",fontSize:12}}>↻ Sync"}
+            {unlocked?"🔓 Edit Mode ON":"🔒 View Only"}
           </button>
           <div style={{display:"flex",alignItems:"center",gap:6}}>
             <span style={{fontSize:12,color:"#A6EB93"}}>Month:</span>
