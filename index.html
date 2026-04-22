@@ -21,7 +21,9 @@
     appId: "1:985499387301:web:c75f3f7a9890dcc692544c"
   });
   const db = getFirestore(app);
-  window.__db = db; window.__setDoc = setDoc; window.__doc = doc;
+  import {enableNetwork} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+enableNetwork(db);
+window.__db = db; window.__setDoc = setDoc; window.__doc = doc;
   window.__onSnapshot = onSnapshot; window.__firestoreReady = true;
   window.dispatchEvent(new Event("firebaseReady"));
 </script>
