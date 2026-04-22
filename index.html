@@ -208,7 +208,7 @@ function App(){
     window.__setDoc(window.__doc(window.__db,"tracker","state"),obj,{merge:true}).then(function(){
       setLastSaved(new Date().toLocaleTimeString());setSaving(false);
     }).catch(function(){setSaving(false);});
- },[dbReady]);
+ });
 
   // YTD helpers — always Jan through curMon
   function ytdA(n){ return ytdMonths.reduce(function(s,m){ return s+((data[n]&&data[n].MRR[m])?data[n].MRR[m].A:0); },0); }
