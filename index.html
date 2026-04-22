@@ -42,7 +42,6 @@ var useMemo = React.useMemo;
 var EDIT_PASSWORD = "sprout2026";
 var MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 var ADJ = ["MRR","E/F","One-time Fees","Implementation"];
-var MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 var TEAMS = ["ENT Builders","ENT Hunters","SME Jetzsetters","SME Strikers","Channels","Upsell"];
 var TCOL = {"ENT Builders":"#092903","ENT Hunters":"#8139EE","SME Jetzsetters":"#1679FA","SME Strikers":"#FF7F00","Channels":"#239A0D","Upsell":"#dc2626"};
 var STCFG = {
@@ -209,7 +208,7 @@ function App(){
     window.__setDoc(window.__doc(window.__db,"tracker","state"),obj,{merge:true}).then(function(){
       setLastSaved(new Date().toLocaleTimeString());setSaving(false);
     }).catch(function(){setSaving(false);});
- },[]);
+ },[dbReady]);
 
   // YTD helpers — always Jan through curMon
   function ytdA(n){ return ytdMonths.reduce(function(s,m){ return s+((data[n]&&data[n].MRR[m])?data[n].MRR[m].A:0); },0); }
