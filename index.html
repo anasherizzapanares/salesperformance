@@ -264,7 +264,7 @@ function App(){
 
   function updateRepStatus(name,newStatus){
     var nr=reps.map(function(r){if(r.n!==name) return r;var copy=Object.assign({},r);if(newStatus){copy.s=newStatus;}else{delete copy.s;}return copy;});
-    setReps(nr);save({reps:nr});setShowEditRep(null);
+    setReps(nr);save({reps:nr,data:data,meta:meta,segA:segA,accel:accel});setShowEditRep(null);
   }
 
   function togSort(col){if(sortCol===col) setSortDir(function(d){return d==="desc"?"asc":"desc";});else{setSortCol(col);setSortDir("desc");}}
